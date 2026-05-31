@@ -1,0 +1,62 @@
+name: Bug Report
+description: Something is broken or rendering incorrectly
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - 3D scene / WebGL rendering
+        - Hotspot interaction (hover / click)
+        - Content panel
+        - Mobile 2D fallback
+        - Deployment / build
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      placeholder: Describe the bug clearly. Include browser, OS, and screen size.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open site on ...
+        2. Hover over ...
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser + version
+      placeholder: e.g. Chrome 124 on macOS 14.4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device type
+      options:
+        - Desktop
+        - Mobile
+        - Tablet
+    validations:
+      required: true

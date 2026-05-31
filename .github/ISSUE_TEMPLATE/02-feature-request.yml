@@ -1,0 +1,44 @@
+name: Feature / Enhancement
+description: Suggest a new portfolio section, visual effect, or improvement
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of improvement
+      options:
+        - 3D scene / visual effects
+        - Portfolio content (section, copy)
+        - Interaction / UX
+        - Performance
+        - Mobile experience
+        - Accessibility
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What's the idea?
+      placeholder: Describe the feature clearly and concisely.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would this improve the portfolio?
+      placeholder: What does it help the visitor understand or do?
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated effort
+      options:
+        - Small (< 2 hours)
+        - Medium (half day)
+        - Large (1+ days)
+        - Unknown
+    validations:
+      required: true
