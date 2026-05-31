@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NgtCanvas } from 'angular-three/dom';
 import { SceneGraphComponent } from './scene-graph.component';
 import { SectionStore } from '../../core/services/section-store';
+import { ModelLoadingService } from '../../core/services/model-loading.service';
 import { SECTIONS } from '../../core/models/section.types';
 import { LoaderComponent } from '../../ui/loader/loader.component';
 import { PanelComponent } from '../../ui/panel/panel.component';
@@ -52,7 +53,7 @@ import { FooterComponent } from '../../ui/footer/footer.component';
       </ng-template>
     </ngt-canvas>
 
-    <app-loader [isLoaded]="isLoaded()" />
+    <app-loader [isLoaded]="loading.allLoaded()" [progress]="loading.progress()" />
     <app-panel />
     <app-hint
       [hoveredSection]="section.hoveredSection()"
@@ -64,9 +65,9 @@ import { FooterComponent } from '../../ui/footer/footer.component';
 })
 export class SceneComponent {
   protected readonly section  = inject(SectionStore);
+  protected readonly loading  = inject(ModelLoadingService);
   protected readonly sections = SECTIONS;
 
   readonly cameraConfig = { position: [0, 1.5, 5] as [number, number, number] };
   readonly glConfig     = { antialias: true, powerPreference: 'high-performance' as const };
-  readonly isLoaded     = signal(true);
 }

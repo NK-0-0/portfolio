@@ -1,18 +1,15 @@
-import { Component, inject, signal, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, inject, signal, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA, effect } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { injectLoader, injectBeforeRender, NgtArgs } from 'angular-three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Object3D } from 'three';
+import { ModelLoadingService } from '../../core/services/model-loading.service';
 
-/**
- * The scene-root name used in the HOTSPOT_MAP to identify this object
- * when raycasting. InteractionComponent walks up the hierarchy to find this.
- */
 export const MASK_OBJECT_NAME = 'anbu_mask_root';
 
 /**
  * Standalone floating ANBU mask — a separate GLB that orbits near Kakashi.
- * Clicking it (via InteractionComponent raycasting) opens the Projects panel.
+ * Reports to ModelLoadingService when its download completes.
  */
 @Component({
   selector: 'app-mask',
@@ -35,15 +32,26 @@ export const MASK_OBJECT_NAME = 'anbu_mask_root';
 export class MaskComponent {
   protected readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   protected readonly maskObjectName = MASK_OBJECT_NAME;
+  readonly #loading = inject(ModelLoadingService);
 
   readonly gltf = this.isBrowser
     ? injectLoader(() => GLTFLoader, () => 'models/mask/anbu_kakashi_mask.glb')
     : signal(null);
 
+  readonly #maskLoaded = signal(false);
   #maskScene: Object3D | null = null;
   #elapsed = 0;
 
   constructor() {
+    // Report to loading service when mask GLB is ready.
+    effect(() => {
+      const model = this.gltf();
+      if (model && !this.#maskLoaded()) {
+        this.#maskLoaded.set(true);
+        this.#loading.markLoaded();
+      }
+    });
+
     injectBeforeRender(({ delta }) => {
       if (!this.isBrowser) return;
       const model = this.gltf();

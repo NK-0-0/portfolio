@@ -1,11 +1,14 @@
-import { Component, inject, signal, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, inject, signal, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA, effect } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { injectLoader, injectBeforeRender, NgtArgs } from 'angular-three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { ModelLoadingService } from '../../core/services/model-loading.service';
 import { environment } from '../../../environments/environment';
 
 /**
  * Loads the Kakashi Hatake GLB and displays it via ngt-primitive.
+ * Reports to ModelLoadingService when the download completes so the
+ * loading screen can dismiss at the right time.
  *
  * ── HOTSPOT MESH NAMES — UPDATE BEFORE SHIPPING ──────────────────────
  * 1. Run `npm start`, open DevTools console.
@@ -34,6 +37,7 @@ import { environment } from '../../../environments/environment';
 })
 export class KakashiComponent {
   protected readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  readonly #loading = inject(ModelLoadingService);
 
   readonly gltf = this.isBrowser
     ? injectLoader(() => GLTFLoader, () => 'models/kakashi/kakashi.glb')
@@ -42,17 +46,20 @@ export class KakashiComponent {
   readonly loaded = signal(false);
 
   constructor() {
-    if (!environment.showDebugHelpers) return;
-
-    injectBeforeRender(() => {
+    // Report to the loading service as soon as the GLB signal is non-null.
+    effect(() => {
       const model = this.gltf();
       if (model && !this.loaded()) {
         this.loaded.set(true);
-        const names: string[] = [];
-        model.scene.traverse((child: { name: string }) => {
-          if (child.name) names.push(child.name);
-        });
-        console.log('[Kakashi] mesh names (update HOTSPOT_MAP with these):', names);
+        this.#loading.markLoaded();
+
+        if (environment.showDebugHelpers) {
+          const names: string[] = [];
+          model.scene.traverse((child: { name: string }) => {
+            if (child.name) names.push(child.name);
+          });
+          console.log('[Kakashi] mesh names (update HOTSPOT_MAP with these):', names);
+        }
       }
     });
   }
