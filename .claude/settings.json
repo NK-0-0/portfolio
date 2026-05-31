@@ -11,7 +11,14 @@
       "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/environments/ portfolio/src/styles.scss portfolio/src/index.html)",
       "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/app/core/)",
       "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/app/three/)",
-      "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/app/ui/)"
+      "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/app/ui/)",
+      "Bash(npx playwright *)",
+      "Bash(curl -s \"https://nk-0-0.github.io/portfolio/\")",
+      "Bash(git -C /home/nkateko/Desktop/portfolio push)",
+      "Bash(gh -R NK-0-0/portfolio run watch --exit-status)",
+      "Bash(gh -R NK-0-0/portfolio run list --limit 1 --json databaseId,status,conclusion,name)",
+      "Bash(gh -R NK-0-0/portfolio run watch 26712865974 --exit-status)",
+      "Bash(gh -R NK-0-0/portfolio run list --limit 1 --json status,conclusion)"
     ]
   }
 }
