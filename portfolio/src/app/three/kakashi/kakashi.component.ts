@@ -10,17 +10,14 @@ import { injectLoader, injectBeforeRender, NgtArgs } from 'angular-three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Object3D } from 'three';
 import { ModelLoadingService } from '../../core/services/model-loading.service';
+import { ScrollStateService } from '../../core/services/scroll-state.service';
 import { environment } from '../../../environments/environment';
 
-/**
- * Loads the Kakashi Hatake GLB and plays a gentle idle animation.
- * Position and rotation are driven entirely by injectBeforeRender —
- * no [position]/[rotation] bindings in the template to avoid conflicts.
- *
- * Idle motion:
- *  - Slow vertical bob (simulates breathing)
- *  - Slight left/right sway
- */
+/** Target X position per section (0=hero … 5=contact).
+ *  Left-card sections: Kakashi moves screen-right (+x).
+ *  Right-card sections: Kakashi moves screen-left  (-x).  */
+const KAKASHI_X: number[] = [0, 1.8, -1.8, 1.8, -1.8, 1.8];
+
 @Component({
   selector: 'app-kakashi',
   standalone: true,
@@ -36,7 +33,8 @@ import { environment } from '../../../environments/environment';
 })
 export class KakashiComponent {
   protected readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  readonly #loading = inject(ModelLoadingService);
+  readonly #loading     = inject(ModelLoadingService);
+  readonly #scrollState = inject(ScrollStateService);
 
   readonly gltf = this.isBrowser
     ? injectLoader(() => GLTFLoader, () => 'models/kakashi/kakashi.glb')
@@ -46,15 +44,13 @@ export class KakashiComponent {
   #scene: Object3D | null = null;
 
   constructor() {
-    injectBeforeRender(({ clock }) => {
+    injectBeforeRender(({ clock, delta }) => {
       const model = this.gltf();
 
       if (model && !this.loaded()) {
         this.loaded.set(true);
         this.#loading.markLoaded();
         this.#scene = model.scene;
-
-        // Set initial transform once
         this.#scene.position.set(0, -1.5, 0);
         this.#scene.rotation.y = 0.15;
 
@@ -67,11 +63,17 @@ export class KakashiComponent {
         }
       }
 
-      // Idle animation — runs every frame once model is available
       if (this.#scene) {
         const t = clock.elapsedTime;
+
+        // Idle: breathing bob + sway
         this.#scene.position.y = -1.5 + Math.sin(t * 0.7)  * 0.025;
         this.#scene.rotation.y =  0.15 + Math.sin(t * 0.25) * 0.04;
+
+        // Scroll-driven: smooth lateral shift per section
+        const targetX = KAKASHI_X[this.#scrollState.activeSection()];
+        this.#scene.position.x += (targetX - this.#scene.position.x)
+          * Math.min(delta * 2.2, 1);
       }
     });
   }

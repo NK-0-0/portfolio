@@ -3,6 +3,7 @@
    ============================================================ */
 
 :root {
+  --bg-hue:           240;      /* tweened by GSAP per section */
   --color-bg:         #0d0d0d;
   --color-bg-panel:   #111827;
   --color-bg-overlay: rgba(0, 0, 0, 0.65);
@@ -32,7 +33,15 @@
 html, body {
   width: 100%;
   overflow-x: hidden;
-  background: var(--color-bg);
+  /* GSAP tweens --bg-hue (0-360) for per-section colour shifts.
+     The gradient is transparent at the edges so Three.js particles
+     and fog show through the canvas above it.                       */
+  background: radial-gradient(
+    ellipse at 65% 45%,
+    hsl(var(--bg-hue), 45%, 6%) 0%,
+    hsl(var(--bg-hue), 25%, 3%) 60%,
+    #020204 100%
+  );
   color: var(--color-text);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
