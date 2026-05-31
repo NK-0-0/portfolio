@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting…</title>
+  <script>
+    // GitHub Pages serves this file for unknown routes.
+    // Redirect to index.html, preserving the original path as a query param
+    // so Angular can pick it up and navigate if hash routing is added later.
+    var path = window.location.pathname + window.location.search;
+    window.location.replace('/?p=' + encodeURIComponent(path));
+  </script>
+</head>
+<body></body>
+</html>

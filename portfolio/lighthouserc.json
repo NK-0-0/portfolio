@@ -1,0 +1,16 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "./dist/portfolio/browser",
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance":    ["warn",  { "minScore": 0.75 }],
+        "categories:accessibility":  ["error", { "minScore": 0.90 }],
+        "categories:best-practices": ["warn",  { "minScore": 0.85 }],
+        "categories:seo":            ["warn",  { "minScore": 0.80 }]
+      }
+    }
+  }
+}
