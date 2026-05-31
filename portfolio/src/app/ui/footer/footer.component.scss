@@ -1,0 +1,18 @@
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: 8px 20px;
+  text-align: center;
+  pointer-events: none;
+
+  p {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--color-muted);
+    opacity: 0.7;
+    letter-spacing: 0.04em;
+  }
+}
