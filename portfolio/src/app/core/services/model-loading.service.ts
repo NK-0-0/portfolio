@@ -1,7 +1,7 @@
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-const TOTAL_ASSETS = 4; // Kakashi + ANBU mask + Icha Icha book + kunai
+const TOTAL_ASSETS = 3; // ANBU mask + Icha Icha book + kunai
 const TIMEOUT_MS   = 20_000; // Force-dismiss after 20 s if a model fails to load
 
 /**

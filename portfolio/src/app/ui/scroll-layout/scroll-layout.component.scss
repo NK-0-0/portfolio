@@ -8,50 +8,55 @@
   justify-content: center;
   padding: 0 8vw;
   position: relative;
+  overflow: hidden;
   pointer-events: none;
 }
 
-.hero-content {
-  pointer-events: none;
-}
+.hero-content { pointer-events: none; }
 
 .hero-label {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-heading);
   font-size: 0.72rem;
-  letter-spacing: 0.35em;
+  font-weight: 600;
+  letter-spacing: 0.5em;
   color: var(--color-accent);
   text-transform: uppercase;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .hero-name {
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 7vw, 5rem);
-  font-weight: 700;
+  font-family: var(--font-display);    // Dela Gothic One — ultra-bold
+  font-size: clamp(3rem, 9vw, 7rem);
+  font-weight: 400;                     // Dela Gothic is always bold
   color: #fff;
-  line-height: 1.1;
-  margin-bottom: 16px;
+  line-height: 1.0;
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
 }
 
 .hero-role {
-  font-family: var(--font-mono);
-  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-family: var(--font-heading);
+  font-size: clamp(0.8rem, 1.8vw, 1rem);
+  font-weight: 600;
   color: var(--color-accent);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.35em;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .hero-tagline {
-  font-size: clamp(0.9rem, 1.8vw, 1.05rem);
+  font-family: var(--font-ui);
+  font-size: clamp(0.9rem, 1.6vw, 1rem);
+  font-weight: 300;
   color: var(--color-muted);
-  line-height: 1.6;
+  line-height: 1.7;
+  max-width: 38ch;
 }
 
 .scroll-cue {
   position: absolute;
-  bottom: 44px;
+  bottom: 48px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -63,22 +68,53 @@
 }
 
 .scroll-cue__text {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.25em;
+  font-family: var(--font-heading);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.4em;
   color: var(--color-muted);
   text-transform: uppercase;
 }
 
 .scroll-cue__arrow {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--color-accent);
   animation: bounce 2s ease infinite;
 }
 
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(7px); }
+  50%       { transform: translateY(8px); }
+}
+
+// ── Background kanji ──────────────────────────────────────────────────────────
+
+.kanji {
+  position: absolute;
+  right: 4vw;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(22vw, 30vw, 460px);
+  line-height: 1;
+  color: transparent;
+  // Stroke-only — just an outline, barely visible
+  -webkit-text-stroke: 1px rgba(0, 212, 245, 0.07);
+  text-stroke: 1px rgba(0, 212, 245, 0.07);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  will-change: transform;
+
+  // Hero kanji is larger and more centered
+  &.kanji--hero {
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(30vw, 42vw, 600px);
+    -webkit-text-stroke: 1px rgba(0, 212, 245, 0.05);
+  }
 }
 
 // ── Content sections ──────────────────────────────────────────────────────────
@@ -89,22 +125,23 @@
   align-items: center;
   padding: 80px 5vw;
   position: relative;
-  // Enables rotateY 3D card entrance via GSAP
-  perspective: 1200px;
+  overflow: hidden;
+  perspective: 1200px;   // enables rotateY card entrance
 }
 
-// ── Section label ─────────────────────────────────────────────────────────────
+// ── Section label / counter ───────────────────────────────────────────────────
 
 .section__label {
   position: absolute;
-  top: 48px;
+  top: 52px;
   left: 5vw;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
-  color: rgba(0, 229, 255, 0.35);
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.45em;
+  color: rgba(0, 212, 245, 0.28);
   text-transform: uppercase;
-  // Initial state set by GSAP
+  z-index: 2;
 
   &.section__label--right {
     left: auto;
@@ -113,19 +150,41 @@
 }
 
 // ── Section cards ─────────────────────────────────────────────────────────────
-// Note: no opacity/transform here — GSAP sets initial state and drives animation.
+// GSAP owns opacity + transform — no CSS animation here.
 
 .section-card {
   width: min(540px, 90vw);
-  background: rgba(10, 14, 26, 0.88);
-  border: 1px solid rgba(0, 229, 255, 0.1);
+  background: rgba(8, 11, 22, 0.90);
+  border: 1px solid rgba(0, 212, 245, 0.09);
   border-radius: 16px;
   padding: 44px 40px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 16px 56px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
   will-change: transform, opacity;
+  position: relative;
+  z-index: 2;
 
   &.section-card--left  { margin-right: auto; }
-  &.section-card--right { margin-left: auto; }
+  &.section-card--right { margin-left:  auto; }
+
+  // Top accent line — colour tinted by --bg-hue
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border-top: 1px solid hsl(var(--bg-hue), 60%, 55%);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+}
+
+// ── Clean sections (Projects / Contact) ───────────────────────────────────────
+
+.section--clean {
+  // Slightly more breathing room for the text-only parallax feel
+  padding: 100px 5vw;
 }

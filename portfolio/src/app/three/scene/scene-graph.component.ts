@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { LightingComponent }        from '../environment/lighting.component';
 import { ParticlesComponent }       from '../environment/particles.component';
-import { KakashiComponent }         from '../kakashi/kakashi.component';
 import { MaskComponent }            from '../mask/mask.component';
 import { SceneControllerComponent } from './scene-controller.component';
 import { FloatingModelsComponent }  from '../floating-models/floating-models.component';
@@ -9,13 +8,15 @@ import { FloatingModelsComponent }  from '../floating-models/floating-models.com
 /**
  * Scene graph rendered inside NgtCanvas.
  *
+ * Kakashi has been removed — the ANBU mask is the primary 3D focal element,
+ * transitioning from a large hero centrepiece to per-section decorations.
+ *
  * Order matters:
- *  1. SceneController — sets fog + drives camera, runs first
- *  2. Lighting        — reactive colours follow scroll state
- *  3. Kakashi         — shifts laterally per section
- *  4. Mask            — fades prominently on About
- *  5. FloatingModels  — book + kunai appear on their sections
- *  6. Particles       — ambient dust on top of everything
+ *  1. SceneController — sets fog + camera parallax first
+ *  2. Lighting        — reactive per-section colour
+ *  3. Mask            — hero focal point / About decoration
+ *  4. FloatingModels  — book (Experience) + kunai (Skills)
+ *  5. Particles       — ambient dust rendered last
  */
 @Component({
   selector: 'app-scene-graph',
@@ -23,7 +24,6 @@ import { FloatingModelsComponent }  from '../floating-models/floating-models.com
   imports: [
     SceneControllerComponent,
     LightingComponent,
-    KakashiComponent,
     MaskComponent,
     FloatingModelsComponent,
     ParticlesComponent,
@@ -31,7 +31,6 @@ import { FloatingModelsComponent }  from '../floating-models/floating-models.com
   template: `
     <app-scene-controller />
     <app-lighting />
-    <app-kakashi />
     <app-mask />
     <app-floating-models />
     <app-particles />

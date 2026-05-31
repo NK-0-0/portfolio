@@ -4,20 +4,22 @@
 
 :root {
   --bg-hue:           240;      /* tweened by GSAP per section */
-  --color-bg:         #0d0d0d;
-  --color-bg-panel:   #111827;
-  --color-bg-overlay: rgba(0, 0, 0, 0.65);
-  --color-accent:     #00e5ff;
-  --color-accent-dim: #0097a7;
-  --color-text:       #e2e8f0;
-  --color-muted:      #64748b;
-  --color-amber:      #f59e0b;
-  --color-tag-bg:     rgba(0, 229, 255, 0.08);
-  --color-tag-border: rgba(0, 229, 255, 0.25);
+  --color-bg:         #080810;
+  --color-bg-panel:   #0e1120;
+  --color-bg-overlay: rgba(0, 0, 0, 0.72);
+  --color-accent:     #00d4f5;
+  --color-accent-dim: #0097b8;
+  --color-text:       #dde4ee;
+  --color-muted:      #5a6880;
+  --color-amber:      #e8950a;
+  --color-tag-bg:     rgba(0, 212, 245, 0.07);
+  --color-tag-border: rgba(0, 212, 245, 0.22);
 
+  /* ── Typography ─────────────────────────────────────── */
+  --font-display: 'Dela Gothic One', sans-serif;          /* hero name only   */
+  --font-heading: 'Shippori Mincho B1', 'Noto Serif JP', serif; /* section headings */
+  --font-ui:      'Noto Sans JP', -apple-system, sans-serif;
   --font-mono:    'JetBrains Mono', 'Courier New', monospace;
-  --font-display: 'Noto Serif JP', serif;
-  --font-ui:      -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   --transition-panel: 400ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-hover: 200ms ease;
@@ -67,12 +69,12 @@ html, body {
 }
 
 .section-heading {
-  font-family: var(--font-display);
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 800;
   color: var(--color-accent);
   margin-bottom: 24px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
 }
 
 .tag {
