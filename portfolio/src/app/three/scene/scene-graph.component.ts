@@ -1,35 +1,23 @@
 import { Component } from '@angular/core';
-import { LightingComponent } from '../environment/lighting.component';
+import { LightingComponent }  from '../environment/lighting.component';
 import { ParticlesComponent } from '../environment/particles.component';
-import { KakashiComponent } from '../kakashi/kakashi.component';
-import { MaskComponent } from '../mask/mask.component';
-import { EffectsComponent } from '../post-processing/effects.component';
-import { InteractionComponent } from '../interaction/interaction.component';
+import { KakashiComponent }   from '../kakashi/kakashi.component';
+import { MaskComponent }      from '../mask/mask.component';
 
 /**
  * Scene graph rendered inside NgtCanvas.
- * Composes all 3D elements: lighting, the Kakashi character,
- * the floating ANBU mask, ambient particles, post-processing, and
- * the interaction manager (raycasting — must live inside the canvas context).
+ * Lighting, Kakashi (idle-animated), floating ANBU mask, and ambient particles.
+ * Raycasting and post-processing removed — interaction is now scroll-driven.
  */
 @Component({
   selector: 'app-scene-graph',
   standalone: true,
-  imports: [
-    LightingComponent,
-    KakashiComponent,
-    MaskComponent,
-    ParticlesComponent,
-    EffectsComponent,
-    InteractionComponent,
-  ],
+  imports: [LightingComponent, KakashiComponent, MaskComponent, ParticlesComponent],
   template: `
     <app-lighting />
     <app-kakashi />
     <app-mask />
     <app-particles />
-    <app-effects />
-    <app-interaction />
   `,
 })
 export class SceneGraphComponent {}

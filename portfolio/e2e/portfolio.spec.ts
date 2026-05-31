@@ -40,7 +40,6 @@ test.describe('Kakashi Portfolio — live site smoke tests', () => {
     console.log(`Rendering mode: ${mode}`);
     console.log(`JS errors: ${errors.length ? errors.join('\n') : 'none'}`);
 
-    // Ignore favicon 404 — it is present in the repo but may be cached differently
     const realErrors = errors.filter(e => !e.toLowerCase().includes('favicon'));
     expect(realErrors).toHaveLength(0);
     expect(['3d', 'fallback']).toContain(mode);
@@ -50,33 +49,26 @@ test.describe('Kakashi Portfolio — live site smoke tests', () => {
     await page.goto('/portfolio/');
     await waitForApp(page);
 
-    // Use the inner <footer> element — the host custom element has no layout
-    // height of its own (its only child is position:fixed), which makes some
-    // visibility checks false-positive. The <footer> element itself is always
-    // in the viewport via position:fixed.
     const footer = page.locator('app-footer footer');
     await expect(footer).toBeVisible({ timeout: 10_000 });
     await expect(footer).toContainText('Masashi Kishimoto');
     await expect(footer).toContainText('Studio Pierrot');
   });
 
-  test('hint overlay is visible before any interaction', async ({ page }) => {
+  test('hero section is visible on load', async ({ page }) => {
     await page.goto('/portfolio/');
     await waitForApp(page);
 
-    const hint = page.locator('app-hint .idle');
-    await expect(hint).toBeVisible({ timeout: 10_000 });
-    await expect(hint).toContainText('Hover');
+    const hero = page.locator('.section--hero');
+    await expect(hero).toBeVisible({ timeout: 10_000 });
+    await expect(hero.locator('.scroll-cue')).toBeVisible();
   });
 
   test('3D canvas has non-zero dimensions', async ({ page }) => {
     await page.goto('/portfolio/');
     const mode = await waitForApp(page);
 
-    if (mode !== '3d') {
-      test.skip();
-      return;
-    }
+    if (mode !== '3d') { test.skip(); return; }
 
     const canvas = page.locator('ngt-canvas canvas').first();
     const box = await canvas.boundingBox();
@@ -100,43 +92,37 @@ test.describe('Kakashi Portfolio — live site smoke tests', () => {
     expect(failedRequests).toHaveLength(0);
   });
 
-  // ─── Panel navigation ────────────────────────────────────────────────────
-  // Uses the accessible skip-nav buttons (data-section="*") added to SceneComponent.
-  // These are the same buttons keyboard users and screen readers use — they're
-  // the correct E2E hook because they exercise the real SectionStore.open() path.
+  // ─── Scroll navigation ────────────────────────────────────────────────────
+  // Sections reveal on scroll. The accessible skip-nav (data-section="*")
+  // smooth-scrolls to each section so keyboard users and E2E tests don't
+  // have to actually scroll.
 
-  test.describe('Panel navigation via accessible buttons', () => {
+  test.describe('Scroll navigation via accessible skip-nav', () => {
     const sections = [
-      { id: 'about',      label: 'About Me'   },
-      { id: 'experience', label: 'Experience' },
-      { id: 'skills',     label: 'Skills'     },
-      { id: 'projects',   label: 'Projects'   },
-      { id: 'contact',    label: 'Contact'    },
+      { id: 'about',      heading: 'About Me'   },
+      { id: 'experience', heading: 'Experience' },
+      { id: 'skills',     heading: 'Skills'     },
+      { id: 'projects',   heading: 'Projects'   },
+      { id: 'contact',    heading: 'Contact'    },
     ] as const;
 
-    for (const { id, label } of sections) {
-      test(`"${label}" panel opens and closes`, async ({ page }) => {
+    for (const { id, heading } of sections) {
+      test(`"${heading}" section scrolls into view and reveals`, async ({ page }) => {
         await page.goto('/portfolio/');
         const mode = await waitForApp(page);
         if (mode !== '3d') { test.skip(); return; }
 
-        // Open the section via the accessible nav button
+        // Click the skip-nav button to scroll to the section
         const btn = page.locator(`button[data-section="${id}"]`);
         await expect(btn).toBeAttached({ timeout: 10_000 });
-        // The skip-nav sits at top:-100px so it's outside the viewport.
-        // evaluate().click() triggers the DOM click handler regardless of position.
         await btn.evaluate((el: HTMLElement) => el.click());
 
-        // Panel should slide in
-        const panel = page.locator('.panel');
-        await expect(panel).toBeVisible({ timeout: 8_000 });
+        // Wait for the section card to become visible (IntersectionObserver fires)
+        const card = page.locator(`#${id} .section-card`);
+        await expect(card).toBeVisible({ timeout: 8_000 });
+        await expect(card).toHaveClass(/section-card--visible/, { timeout: 8_000 });
 
-        // The close button should work
-        const closeBtn = page.locator('.close-btn').first();
-        await closeBtn.click();
-        await expect(panel).not.toBeVisible({ timeout: 5_000 });
-
-        await page.screenshot({ path: `e2e/screenshots/panel-${id}.png` });
+        await page.screenshot({ path: `e2e/screenshots/section-${id}.png` });
       });
     }
   });

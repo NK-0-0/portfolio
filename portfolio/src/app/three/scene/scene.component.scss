@@ -1,11 +1,40 @@
+// The host needs no fixed height — scrollable content provides document height.
 :host {
   display: block;
   position: relative;
-  width: 100%;
-  height: 100%;
 }
 
-/* Skip-nav — visually hidden until keyboard-focused */
+// Three.js canvas sits fixed behind everything.
+.canvas-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+
+  ngt-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+// app-scroll-layout is a normal flow element;
+// its sections create the document height that enables scrolling.
+app-scroll-layout {
+  position: relative;
+  z-index: 1;
+}
+
+// Loader and footer sit above the scroll content.
+app-loader {
+  z-index: 100;
+}
+
+app-footer {
+  z-index: 10;
+}
+
+// ── Skip-nav (keyboard / E2E) ──────────────────────────────────────────────
+
 .sr-nav {
   position: fixed;
   top: -100px;
@@ -33,17 +62,4 @@
   cursor: pointer;
 
   &:focus { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-}
-
-.canvas-host {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-
-  ngt-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
 }

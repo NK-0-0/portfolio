@@ -1,24 +1,21 @@
 import { Component, inject } from '@angular/core';
 import { NgtCanvas } from 'angular-three/dom';
-import { SceneGraphComponent } from './scene-graph.component';
-import { SectionStore } from '../../core/services/section-store';
-import { ModelLoadingService } from '../../core/services/model-loading.service';
-import { SECTIONS } from '../../core/models/section.types';
-import { LoaderComponent } from '../../ui/loader/loader.component';
-import { PanelComponent } from '../../ui/panel/panel.component';
-import { HintComponent } from '../../ui/hint/hint.component';
-import { FooterComponent } from '../../ui/footer/footer.component';
+import { SceneGraphComponent }   from './scene-graph.component';
+import { ModelLoadingService }   from '../../core/services/model-loading.service';
+import { ScrollLayoutComponent } from '../../ui/scroll-layout/scroll-layout.component';
+import { LoaderComponent }       from '../../ui/loader/loader.component';
+import { FooterComponent }       from '../../ui/footer/footer.component';
+import { SECTIONS }              from '../../core/models/section.types';
 
 /**
- * Full 3D experience shell.
+ * Outer shell for the 3D experience.
  *
- * Camera: fixed at [0, 1.5, 5] — no orbit controls in production.
- * Interaction (raycasting) lives inside SceneGraphComponent → InteractionComponent.
- *
- * The <nav class="sr-nav"> provides keyboard-accessible and testable section
- * navigation. It is visually hidden until focused, acting as a skip-nav bar.
- * This doubles as the hook E2E tests use to open panels without relying on
- * Three.js raycasting.
+ * Layout:
+ *  - .canvas-bg  (position:fixed)  — Three.js canvas, always behind content
+ *  - app-scroll-layout             — scrollable content layer over the canvas
+ *  - app-loader                    — full-screen loading overlay (z-index above all)
+ *  - app-footer                    — fixed attribution footer
+ *  - .sr-nav                       — visually hidden skip-nav (keyboard / E2E)
  */
 @Component({
   selector: 'app-scene',
@@ -26,48 +23,52 @@ import { FooterComponent } from '../../ui/footer/footer.component';
   imports: [
     ...NgtCanvas,
     SceneGraphComponent,
+    ScrollLayoutComponent,
     LoaderComponent,
-    PanelComponent,
-    HintComponent,
     FooterComponent,
   ],
   template: `
-    <!-- Skip-nav / accessible section buttons (also used by E2E tests) -->
+    <!-- Skip-nav: visually hidden until focused; E2E hook via data-section -->
     <nav class="sr-nav" aria-label="Portfolio sections">
       @for (s of sections; track s.id) {
         <button
           class="sr-nav__btn"
           [attr.data-section]="s.id"
-          (click)="section.open(s.id)"
+          (click)="scrollTo(s.id)"
         >{{ s.label }}</button>
       }
     </nav>
 
-    <ngt-canvas
-      [camera]="cameraConfig"
-      [gl]="glConfig"
-      [shadows]="true"
-    >
-      <ng-template canvasContent>
-        <app-scene-graph />
-      </ng-template>
-    </ngt-canvas>
+    <!-- Fixed 3D background -->
+    <div class="canvas-bg">
+      <ngt-canvas
+        [camera]="cameraConfig"
+        [gl]="glConfig"
+        [shadows]="true"
+      >
+        <ng-template canvasContent>
+          <app-scene-graph />
+        </ng-template>
+      </ngt-canvas>
+    </div>
 
+    <!-- Scrollable content over the canvas -->
+    <app-scroll-layout />
+
+    <!-- Loading overlay + footer -->
     <app-loader [isLoaded]="loading.allLoaded()" [progress]="loading.progress()" />
-    <app-panel />
-    <app-hint
-      [hoveredSection]="section.hoveredSection()"
-      [isPanelOpen]="section.isPanelOpen()"
-    />
     <app-footer />
   `,
   styleUrl: './scene.component.scss',
 })
 export class SceneComponent {
-  protected readonly section  = inject(SectionStore);
   protected readonly loading  = inject(ModelLoadingService);
   protected readonly sections = SECTIONS;
 
   readonly cameraConfig = { position: [0, 1.5, 5] as [number, number, number] };
   readonly glConfig     = { antialias: true, powerPreference: 'high-performance' as const };
+
+  scrollTo(id: string): void {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  }
 }

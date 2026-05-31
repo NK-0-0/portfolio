@@ -30,9 +30,8 @@
 }
 
 html, body {
-  height: 100%;
   width: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-ui);
