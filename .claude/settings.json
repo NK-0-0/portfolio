@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx ng *)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio status)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio log --oneline -5)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/angular.json portfolio/src/app/app.config.ts portfolio/src/main.ts portfolio/src/app/app.config.server.ts portfolio/src/app/app.routes.server.ts portfolio/src/main.server.ts portfolio/src/server.ts)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio status --short)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio commit -m ' *)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/package.json portfolio/package-lock.json)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/environments/ portfolio/src/styles.scss portfolio/src/index.html)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/app/core/)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/app/three/)",
+      "Bash(git -C /home/nkateko/Desktop/portfolio add portfolio/src/app/ui/)"
+    ]
+  }
+}
