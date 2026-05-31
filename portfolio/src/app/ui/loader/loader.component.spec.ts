@@ -1,5 +1,4 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { LoaderComponent } from './loader.component';
 
 describe('LoaderComponent', () => {
@@ -8,7 +7,6 @@ describe('LoaderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LoaderComponent],
-      providers: [provideNoopAnimations()],
     }).compileComponents();
     fixture = TestBed.createComponent(LoaderComponent);
   });
@@ -17,14 +15,18 @@ describe('LoaderComponent', () => {
     fixture.componentRef.setInput('isLoaded', false);
     fixture.componentRef.setInput('progress', 0);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.loader')).not.toBeNull();
+    const loader = fixture.nativeElement.querySelector('.loader') as HTMLElement;
+    expect(loader).not.toBeNull();
+    expect(loader.classList.contains('loader--done')).toBe(false);
   });
 
   it('hides the loader when isLoaded is true', () => {
     fixture.componentRef.setInput('isLoaded', true);
     fixture.componentRef.setInput('progress', 100);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.loader')).toBeNull();
+    const loader = fixture.nativeElement.querySelector('.loader') as HTMLElement;
+    expect(loader).not.toBeNull();
+    expect(loader.classList.contains('loader--done')).toBe(true);
   });
 
   it('renders the progress bar', () => {

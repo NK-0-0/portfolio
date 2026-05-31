@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { PLATFORM_ID } from '@angular/core';
 import { App } from './app';
@@ -10,7 +9,6 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideRouter([]),
-        provideNoopAnimations(),
         // Server platform: DeviceCapabilityService returns false, 3D skipped
         { provide: PLATFORM_ID, useValue: 'server' },
       ],

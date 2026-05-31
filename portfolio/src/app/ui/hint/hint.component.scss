@@ -2,10 +2,17 @@
   position: fixed;
   bottom: 72px;
   left: 50%;
-  transform: translateX(-50%);
   z-index: 10;
   pointer-events: none;
   text-align: center;
+  opacity: 0;
+  transform: translateX(-50%) translateY(6px);
+  transition: opacity 300ms ease, transform 300ms ease;
+
+  &.hint--visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .idle {

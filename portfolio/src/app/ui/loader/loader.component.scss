@@ -6,6 +6,12 @@
   align-items: center;
   justify-content: center;
   background: var(--color-bg);
+  transition: opacity 700ms 200ms ease;
+
+  &.loader--done {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 .loader__inner {

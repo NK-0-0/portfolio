@@ -1,5 +1,4 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { HintComponent } from './hint.component';
 
 describe('HintComponent', () => {
@@ -8,7 +7,6 @@ describe('HintComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HintComponent],
-      providers: [provideNoopAnimations()],
     }).compileComponents();
     fixture = TestBed.createComponent(HintComponent);
   });
@@ -31,11 +29,12 @@ describe('HintComponent', () => {
     expect(el.textContent).toContain('ABOUT');
   });
 
-  it('hides the hint entirely when the panel is open', () => {
+  it('hides the hint when the panel is open', () => {
     fixture.componentRef.setInput('hoveredSection', null);
     fixture.componentRef.setInput('isPanelOpen', true);
     fixture.detectChanges();
-    const hint = fixture.nativeElement.querySelector('.hint');
-    expect(hint).toBeNull();
+    const hint = fixture.nativeElement.querySelector('.hint') as HTMLElement;
+    expect(hint).not.toBeNull();
+    expect(hint.classList.contains('hint--visible')).toBe(false);
   });
 });

@@ -5,6 +5,14 @@
   background: var(--color-bg-overlay);
   backdrop-filter: blur(2px);
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+
+  &.backdrop--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .panel {
@@ -19,6 +27,21 @@
   display: flex;
   flex-direction: column;
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
+  transform: translateX(100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 400ms cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 400ms;
+
+  &.panel--open {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 400ms cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0s;
+  }
 }
 
 .close-btn {
