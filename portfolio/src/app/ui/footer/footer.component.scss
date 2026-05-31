@@ -1,3 +1,8 @@
+/* Host needs explicit display so Playwright (and accessibility tools)
+   see a non-zero element. Inner content is position:fixed so it doesn't
+   contribute to flow height without this. */
+:host { display: block; }
+
 .footer {
   position: fixed;
   bottom: 0;
