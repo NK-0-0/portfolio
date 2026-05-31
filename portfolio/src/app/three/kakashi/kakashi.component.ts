@@ -1,4 +1,4 @@
-import { Component, inject, signal, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA, effect } from '@angular/core';
+import { Component, inject, signal, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { injectLoader, injectBeforeRender, NgtArgs } from 'angular-three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -7,8 +7,9 @@ import { environment } from '../../../environments/environment';
 
 /**
  * Loads the Kakashi Hatake GLB and displays it via ngt-primitive.
- * Reports to ModelLoadingService when the download completes so the
- * loading screen can dismiss at the right time.
+ * Reports to ModelLoadingService when the download completes using
+ * injectBeforeRender (not effect()) — avoids the allowSignalWrites
+ * requirement and runs in the correct NGT injection context.
  *
  * ── HOTSPOT MESH NAMES — UPDATE BEFORE SHIPPING ──────────────────────
  * 1. Run `npm start`, open DevTools console.
@@ -46,8 +47,10 @@ export class KakashiComponent {
   readonly loaded = signal(false);
 
   constructor() {
-    // Report to the loading service as soon as the GLB signal is non-null.
-    effect(() => {
+    // Use injectBeforeRender instead of effect() to avoid the
+    // allowSignalWrites requirement when writing to this.loaded inside
+    // a reactive context.
+    injectBeforeRender(() => {
       const model = this.gltf();
       if (model && !this.loaded()) {
         this.loaded.set(true);

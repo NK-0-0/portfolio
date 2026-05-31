@@ -1,4 +1,4 @@
-import { Component, inject, signal, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA, effect } from '@angular/core';
+import { Component, inject, signal, PLATFORM_ID, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { injectLoader, injectBeforeRender, NgtArgs } from 'angular-three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -10,6 +10,7 @@ export const MASK_OBJECT_NAME = 'anbu_mask_root';
 /**
  * Standalone floating ANBU mask — a separate GLB that orbits near Kakashi.
  * Reports to ModelLoadingService when its download completes.
+ * Uses injectBeforeRender (not effect()) to avoid allowSignalWrites issues.
  */
 @Component({
   selector: 'app-mask',
@@ -43,19 +44,16 @@ export class MaskComponent {
   #elapsed = 0;
 
   constructor() {
-    // Report to loading service when mask GLB is ready.
-    effect(() => {
-      const model = this.gltf();
-      if (model && !this.#maskLoaded()) {
-        this.#maskLoaded.set(true);
-        this.#loading.markLoaded();
-      }
-    });
-
     injectBeforeRender(({ delta }) => {
       if (!this.isBrowser) return;
       const model = this.gltf();
       if (!model) return;
+
+      // Report loaded on first frame the model is available.
+      if (!this.#maskLoaded()) {
+        this.#maskLoaded.set(true);
+        this.#loading.markLoaded();
+      }
 
       if (!this.#maskScene) this.#maskScene = model.scene;
       const sceneNode = this.#maskScene;
