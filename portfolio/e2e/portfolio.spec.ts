@@ -123,7 +123,9 @@ test.describe('Kakashi Portfolio — live site smoke tests', () => {
         // Open the section via the accessible nav button
         const btn = page.locator(`button[data-section="${id}"]`);
         await expect(btn).toBeAttached({ timeout: 10_000 });
-        await btn.click({ force: true }); // force bypasses the sr-nav position
+        // The skip-nav sits at top:-100px so it's outside the viewport.
+        // evaluate().click() triggers the DOM click handler regardless of position.
+        await btn.evaluate((el: HTMLElement) => el.click());
 
         // Panel should slide in
         const panel = page.locator('.panel');
