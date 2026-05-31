@@ -37,7 +37,7 @@ export class MaskComponent {
   protected readonly maskObjectName = MASK_OBJECT_NAME;
 
   readonly gltf = this.isBrowser
-    ? injectLoader(() => GLTFLoader, () => '/models/mask/anbu_kakashi_mask.glb')
+    ? injectLoader(() => GLTFLoader, () => 'models/mask/anbu_kakashi_mask.glb')
     : signal(null);
 
   #maskScene: Object3D | null = null;

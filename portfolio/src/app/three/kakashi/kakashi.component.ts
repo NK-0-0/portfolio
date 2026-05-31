@@ -36,7 +36,7 @@ export class KakashiComponent {
   protected readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly gltf = this.isBrowser
-    ? injectLoader(() => GLTFLoader, () => '/models/kakashi/kakashi.glb')
+    ? injectLoader(() => GLTFLoader, () => 'models/kakashi/kakashi.glb')
     : signal(null);
 
   readonly loaded = signal(false);
