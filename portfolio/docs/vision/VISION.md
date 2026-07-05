@@ -1,6 +1,6 @@
 # Project Vision — Signal Ghost (Original Sci-Fi Portfolio)
 
-> Supersedes the archived Kakashi/Naruto fan-art concept (`docs/archive/LEGACY_VISION.md`). See `docs/ROADMAP.md` for why that concept was dropped and how the rework is sequenced. This document is the visual/content brief; `docs/architecture/ARCHITECTURE.md` and `CLAUDE.md` cover the technical implementation, which is **unchanged** by this rebrand — only the theme and assets change.
+> Supersedes the archived Kakashi/Naruto fan-art concept (`docs/archive/LEGACY_VISION.md`). See `docs/ROADMAP.md` for why that concept was dropped and how the rework is sequenced. This document is the visual/content brief; `docs/architecture/ARCHITECTURE.md` and `CLAUDE.md` cover the technical implementation, which is **unchanged** by this rebrand — only the theme and assets change. **See `docs/vision/REQUIREMENTS.md`** for this brief turned into testable functional/non-functional acceptance criteria, web-verified feasibility notes, and open design-review flags (added 2026-07-05) — that document is the one `angular-dev`/`qa-engineer` should work from for "is this actually done."
 
 ## Concept & Mood
 
@@ -25,20 +25,22 @@ No third-party characters, franchises, or copyrighted designs are referenced any
 
 ## Palette
 
+> **Design review flag — RESOLVED 2026-07-05 (owner decision: ACCEPTED).** The original 6-accent table (cyan/magenta/green/amber/coral + reserved red) was flagged by the `ui-ux-designer` agent as being in tension with this document's own "What NOT To Do" guidance to keep adjacent hue deltas modest. The owner accepted the proposed consolidation below. Full rationale recorded in `docs/vision/REQUIREMENTS.md`'s "Design Review Flags (Resolved)" section.
+
 | Role | Hex | Notes |
 |---|---|---|
 | Background / void | `#05060a` | Deep space, not "dark UI" |
 | Surface panel | `#0b0f1a` | Card backgrounds |
-| Primary accent — Signal Cyan | `#00e5ff` | Carried over from the current rim-light hero color |
-| Secondary accent — Signal Magenta | `#b464ff` | Reframes the current violet as "encrypted," not "mystical" |
-| Confirm / terminal green | `#39ff9d` | New — skill-proficiency bars, "online" states |
-| Warm signal — amber | `#ffcc00` | Kept — reads as "status: live" for Projects |
-| Warm handshake — coral | `#ff6a5a` | Kept hex, relabeled "transmission received" |
+| **Identity axis** — Signal Cyan | `#00e5ff` | Primary. Every section's rim-light/fog target is drawn from this axis only (cyan↔magenta blends) — no other hue family owns a section wash |
+| **Identity axis** — Signal Magenta | `#b464ff` | Secondary. Reframes the prior violet as "encrypted," not "mystical" |
+| Confirm / terminal green (functional only) | `#39ff9d` | Demoted from a section-wide wash (previously Skills) to an **element-level accent only** — skill-proficiency bars, "online" status chips. Never a rim-light/fog target. |
+| Live-status amber (functional only) | `#ffcc00` | Demoted from a section-wide wash (previously Projects) to an **element-level accent only** — the "status: live" badge/chip. Never a rim-light/fog target. |
+| ~~Warm handshake — coral~~ | ~~`#ff6a5a`~~ | **Cut.** Previously used for Contact ("transmission received"); a third warm hue competed with amber and reserved red. Contact now uses a warm-shifted cyan instead (see beat sheet). |
 | Danger (UI-only) | `#ff3b3b` | Reserved for real error states (form validation) only — never a section-wide wash |
 | Text primary | `#e6ecf5` | |
 | Text muted | `#6b7691` | |
 
-Most existing hex values in `scene-controller.component.ts` (`FOG_COLORS`) and `lighting.component.ts` (`MOON_COLORS`/`RIM_COLORS`) keep their hue relationships and only need relabeling/nudging — the current palette already leans sci-fi more than "ninja."
+**Net effect:** 6 section-owning accents → 2 (cyan + magenta, riding one axis) + 2 demoted-to-functional (green, amber, now UI-element-only) + 1 reserved (red) + 1 cut (coral). Every section's rim-light and fog color is now a blend point on the cyan→magenta axis — see the updated beat sheet below for the specific per-section values. Existing hex values in `scene-controller.component.ts` (`FOG_COLORS`) and `lighting.component.ts` (`MOON_COLORS`/`RIM_COLORS`) need retuning to these axis values for Skills, Projects, and Contact specifically (Hero, About, Experience were already on-axis and are unchanged).
 
 ## Materials & Lighting
 
@@ -65,16 +67,20 @@ The current `Dela Gothic One` / `Shippori Mincho B1` / `Noto Sans JP` stack and 
 
 ## Per-Section Scroll Beat Sheet
 
+> **Design review flags (2026-07-05) — status:** two pacing notes from the `ui-ux-designer` agent, spec'd as testable ACs in `docs/vision/REQUIREMENTS.md` FR-2 — (1) the Experience→Skills `CAMERA_Y` jump (0.9→1.6) is the largest single delta in the sequence and should be manually verified under fast scroll-reversal; (2) About and Experience currently share an identical motion grammar (prop shrinks/fades one side, card slides the other) and should be differentiated by motion, not just fog hue, or they'll read as one long beat rather than two distinct ones. Both remain open manual-verification items (not blocking), tracked in `REQUIREMENTS.md` FR-2.
+>
+> **Palette consolidation — ACCEPTED 2026-07-05:** rim/fog colors below are updated to the 2-color (cyan↔magenta) identity axis. Hero, About, and Experience were already on-axis and are **unchanged**. Skills, Projects, and Contact previously used a section-owning green/amber/coral wash — those three rows are updated below; the green/amber hexes still exist but move to element-level UI accents only (proficiency bar, "live" chip), never the 3D rim/fog target.
+
 Per-section state lives in module-level arrays (`FOG_COLORS`/`CAMERA_Y` in `scene-controller.component.ts`, `MOON_COLORS`/`RIM_COLORS` in `lighting.component.ts`, `SECTION_HUES` in `scroll-layout.component.ts`, plus inline per-section target blocks in `mask.component.ts` and `floating-models.component.ts`). All need new *values*; none need a new *shape* — this is the architecture's strength (see `docs/architecture/ARCHITECTURE.md`).
 
 | Section | Eye lands on | Camera/light/fog change | Scroll distance | Arrays to retune |
 |---|---|---|---|---|
-| **0. Hero — Boot Sequence** | HUD-core prop beside hero name, gentle idle rock, scanline sweep on load | `CAMERA_Y[0]=1.5`, fog `#0a0e18`, rim cyan `#00e5ff` | Keep current `+=680px` scrub-pinned exit (already well-tuned) | Mostly reusable as-is |
-| **1. About — Identity Core** | HUD-core shrinks to badge-size, right side; card slides in left | `CAMERA_Y[1]=1.2`, fog blue-violet, moon blue-white | ~100vh | `FOG_COLORS[1]`, `MOON_COLORS[1]` |
-| **2. Experience — Mission Log** | New data-shard prop fades in left (reuses old book's coords), card enters right | `CAMERA_Y[2]=0.9`, fog magenta-tinged `#b464ff`, rim magenta | ~100vh | `floating-models.component.ts` book-target block (position reusable, recolor emissive) |
-| **3. Skills — Loadout** | New drone/module prop parked right, spinning | `CAMERA_Y[3]=1.6`, fog terminal-green tinge, rim `#39ff9d` | ~100vh | `MOON_COLORS[3]`/`RIM_COLORS[3]`, `SECTION_HUES[3]` |
-| **4. Projects — Deployed Constructs** | Same drone prop, now left, amber "live" glow | `CAMERA_Y[4]=1.1`, fog amber, rim gold `#ffcc00` | ~100vh | Reuse existing left/right toggle logic verbatim |
-| **5. Contact — Uplink** | CTA (email/socials); HUD-core stays ghosted or pulses once | `CAMERA_Y[5]=0.7`, fog/rim keep current coral `#ff6a5a`, relabeled "signal received" | ~90vh (shorter — a landing beat, not a buildup) | `FOG_COLORS[5]`/`RIM_COLORS[5]` fine as-is |
+| **0. Hero — Boot Sequence** | HUD-core prop beside hero name, gentle idle rock, scanline sweep on load | `CAMERA_Y[0]=1.5`, fog `#0a0e18`, rim cyan `#00e5ff` (axis anchor, unchanged) | Keep current `+=680px` scrub-pinned exit (already well-tuned) | Mostly reusable as-is |
+| **1. About — Identity Core** | HUD-core shrinks to badge-size, right side; card slides in left | `CAMERA_Y[1]=1.2`, fog/rim `#24cbff` (cyan blended ~20% toward magenta — unchanged from original "blue-violet" intent, now pinned to an exact on-axis hex), moon blue-white | ~100vh | `FOG_COLORS[1]`, `MOON_COLORS[1]` |
+| **2. Experience — Mission Log** | New data-shard prop fades in left (reuses old book's coords), card enters right | `CAMERA_Y[2]=0.9`, fog/rim `#b464ff` (full Signal Magenta — axis peak, unchanged) | ~100vh | `floating-models.component.ts` book-target block (position reusable, recolor emissive) |
+| **3. Skills — Loadout** | New drone/module prop parked right, spinning | `CAMERA_Y[3]=1.6`, fog/rim `#1bd2ff` (cyan blended ~15% toward magenta — pulled back from the axis peak toward the "operational/practical" end). Terminal green `#39ff9d` still appears, but only on skill-proficiency-bar UI elements, not the 3D fog/rim. | ~100vh | `MOON_COLORS[3]`/`RIM_COLORS[3]`, `SECTION_HUES[3]` |
+| **4. Projects — Deployed Constructs** | Same drone prop, now left, "live" badge accent | `CAMERA_Y[4]=1.1`, fog/rim `#9977ff` (cyan blended ~85% toward magenta — near the Experience peak, reads as "active/deployed" while staying on-axis). Amber `#ffcc00` still appears, but only on the "status: live" badge/chip, not the 3D fog/rim. | ~100vh | Reuse existing left/right toggle logic verbatim |
+| **5. Contact — Uplink** | CTA (email/socials); HUD-core stays ghosted or pulses once | `CAMERA_Y[5]=0.7`, fog/rim `#00ffcc` (cyan nudged toward teal — a warm-shifted cyan variant, not a new hue family, replacing the cut coral `#ff6a5a`), relabeled "signal received" | ~90vh (shorter — a landing beat, not a buildup) | `FOG_COLORS[5]`/`RIM_COLORS[5]` — new hex, retune required (was coral) |
 
 ## Original 3D Prop Concepts
 
@@ -94,10 +100,12 @@ Per-section state lives in module-level arrays (`FOG_COLORS`/`CAMERA_Y` in `scen
 - **`injectBeforeRender` lerp factors**: keep `delta * 1.8` (fog/light) and `delta * 2.5` (camera/opacity) — already well-calibrated. Below `delta * 1.0` is visibly slow catch-up; above `delta * 4` loses the soft-lerp feel.
 - **GLB payload budget**: current total is 15.3MB across 4 GLBs — already over budget regardless of theme. If any GLBs are kept: ≤500KB per prop, ≤1.2MB total, Draco-compressed, ≤5k tris, ≤1024px texture. Following the procedural-first recommendation above, v1 payload can be ~0MB.
 - **Draw calls**: keep the scene lean (currently 4–5 draw calls). Any new particle/swarm effect must be a single `Points`/`InstancedMesh`, never per-particle meshes.
-- **Reduced motion**: **not currently implemented anywhere in the codebase** — this is new work, not a tweak. Read `window.matchMedia('(prefers-reduced-motion: reduce)')` once as a signal (mirror the `DeviceCapabilityService` pattern). When true: skip Lenis init (native scroll), keep color/fade transitions but drop scroll-tied parallax, skip idle float/rotation on props (set resting transform once), snap section color/fog transitions instead of lerping.
+- **Reduced motion**: **not currently implemented anywhere in the codebase** — this is new work, not a tweak. Read `window.matchMedia('(prefers-reduced-motion: reduce)')` on load **and attach a `'change'` listener** so a mid-session OS preference toggle is honored without a reload (verified 2026-07-05: a one-time read alone under-specifies current best practice — see `docs/vision/REQUIREMENTS.md` FR-8). When true: skip Lenis init (native scroll), keep color/fade transitions but drop scroll-tied parallax, skip idle float/rotation on props (set resting transform once), and use a **fixed 200ms** discrete cross-fade for section color/fog transitions instead of the continuous per-frame lerp — confirmed by the project owner 2026-07-05 as a firm spec value, not an approximation. "Snap" does not mean instant (0ms reads as a jarring flash, not "reduced"). See `docs/vision/REQUIREMENTS.md` FR-8 for the full testable spec, including a scene-stays-mounted clarification and an IntersectionObserver reveal-class trap.
 - **Mobile/no-WebGL fallback**: `FallbackComponent` needs the same rebrand pass as the 3D scene. Palette/fonts flow through automatically via CSS custom properties; check for old-theme-specific copy. The `innerWidth < 768 || 'ontouchstart' in window` threshold routes many touch-laptops/tablets here too — it's a primary experience for a meaningful share of visitors, not an edge case.
 
 ## What NOT To Do
+
+> **Owner steering note (2026-07-05):** this section is not a ceiling on ambition. The owner's explicit framing when confirming the automated-testing scope (`docs/vision/REQUIREMENTS.md` NFR-9): *"3D animations are quite tricky to work with so we can keep it original and work with animations, cool scroll effects & other amazing effects so that [we do] not overcomplicate the design of the portfolio."* Read as both/and, not a walk-back: creative, impressive scroll/3D motion work is explicitly encouraged — the guardrails below exist so that ambition doesn't tip into a first-time visitor needing to "figure out" an interaction. Every new effect should still clear the bar this list already sets (prefer fewer, well-executed beats over more, half-finished ones) — that bar isn't changing, it's being reaffirmed as the project gets more ambitious with motion/3D work, not loosened or tightened.
 
 - **Don't resurrect hover/raycast hotspots or bloom/post-processing.** These are the orphaned designs from the previous build (`docs/ROADMAP.md` Finding 2–3) — they were abandoned mid-build, not merely unfinished. `UnrealBloomPass` in particular is a common mobile-perf killer; this project already tried it once and it didn't survive contact with reality.
 - **Don't let per-section hue swings make it feel like six different apps.** A recruiter scrolling in 20 seconds should read one coherent identity. Keep hue deltas between adjacent sections modest.

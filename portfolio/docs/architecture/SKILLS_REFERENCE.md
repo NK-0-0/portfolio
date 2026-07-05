@@ -2,6 +2,8 @@
 
 A single-page reference for every library and tool in this project. Use this to look up install commands, key API patterns, and links to official docs without leaving the editor.
 
+> **Corrected 2026-07-05.** Several sections below (raycasting, `postprocessing`, the `SectionStore`/`PanelComponent` test example) documented the archived hover/hotspot design as if it were current. That design was replaced by the scroll-driven architecture in `docs/architecture/ARCHITECTURE.md` — those sections are now explicitly marked **[ARCHIVED — not in live code]** rather than deleted, since `VISION.md`'s "What NOT To Do" list references this exact history and it's useful to know what was tried and rejected. The WebGL test-mock package name and the `angular-three` inject-API deprecation note were factually wrong/stale and have been corrected outright.
+
 ---
 
 ## Angular 21
@@ -87,9 +89,10 @@ export class AppSceneComponent {
 
 ### Scene graph component
 
+The live scene graph is `SceneController` (fog + camera) → `Lighting` → `Mask` (focal prop) → `FloatingModels` (two floating props) → `Particles` — see `src/app/three/scene/scene-graph.component.ts` for the real, current composition.
+
 ```typescript
 import { NgtArgs } from 'angular-three';
-import { NgtsMeshStandardMaterial } from 'angular-three-soba/materials';
 
 @Component({
   selector: 'app-scene-graph',
@@ -97,7 +100,7 @@ import { NgtsMeshStandardMaterial } from 'angular-three-soba/materials';
   template: `
     <ngt-ambient-light [intensity]="0.5" />
     <ngt-directional-light [position]="[5, 10, 5]" [intensity]="1" />
-    <app-kakashi />
+    <app-mask />
   `,
 })
 export class SceneGraphComponent { }
@@ -105,15 +108,22 @@ export class SceneGraphComponent { }
 
 ### Loading a GLB model
 
+**Deprecation note (verified against the installed `angular-three@4.2.2` type definitions, 2026-07-05):** `injectLoader` and `injectBeforeRender` (used throughout this codebase's live components, e.g. `mask.component.ts`) are marked `@deprecated` in the installed version — superseded by `loaderResource()` and `beforeRender()` respectively, and **scheduled for removal in v5**. `injectStore` is not deprecated. They still work today; this is flagged so a future migration isn't a surprise — see `docs/vision/REQUIREMENTS.md` NFR-8. Milestone 3's scene-graph retarget (`docs/ROADMAP.md`) is a natural point to migrate since those components are being touched anyway.
+
 ```typescript
+// Current codebase pattern (works today, but deprecated — see note above)
 import { injectLoader } from 'angular-three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 @Component({...})
-export class KakashiComponent {
-  readonly gltf = injectLoader(GLTFLoader, '/models/kakashi/kakashi.glb');
+export class MaskComponent {
+  readonly gltf = injectLoader(() => GLTFLoader, () => '/models/mask/anbu_kakashi_mask.glb');
   // gltf() is null until loaded; use @if (gltf()) in template
 }
+
+// Non-deprecated v4.2.2 replacement (not yet adopted in this codebase)
+import { loaderResource } from 'angular-three';
+readonly gltf = loaderResource(() => GLTFLoader, () => '/models/mask/hud-core.glb');
 ```
 
 ---
@@ -129,7 +139,9 @@ npm install three
 npm install -D @types/three
 ```
 
-### Raycasting against named meshes
+### Raycasting against named meshes **[ARCHIVED — not in live code]**
+
+This was the interaction model for the abandoned hover/hotspot design (`docs/archive/LEGACY_VISION.md`). `VISION.md`'s "What NOT To Do" explicitly forbids resurrecting hover/raycast hotspots — it had no accessible touch/keyboard equivalent and was one of the diagnosed reasons the original build stalled (`docs/ROADMAP.md` Finding 2). Kept below for historical reference only.
 
 ```typescript
 import { Raycaster, Vector2 } from 'three';
@@ -167,7 +179,9 @@ gltf.scene.traverse((child) => {
 
 ---
 
-## postprocessing — Effects
+## postprocessing — Effects **[ARCHIVED — not in live code, do not add back]**
+
+`VISION.md`'s "What NOT To Do" explicitly forbids bloom/post-processing: `UnrealBloomPass`-style effects are a common mobile-perf killer and this project already tried one (`three/post-processing/effects.component.ts`, orphaned) that didn't survive contact with reality (`docs/ROADMAP.md` Finding 2–3). The `postprocessing` package is **not** a dependency to add. Kept below for historical reference only.
 
 **Docs:** https://pmndrs.github.io/postprocessing  
 **Package:** `postprocessing`
@@ -218,32 +232,15 @@ bloom.selection.add(glowMesh);
 
 ---
 
-## @ngrx/signals — Signal Store (optional enhancement)
+## @ngrx/signals — Signal Store (not currently used; optional future enhancement)
 
 **Docs:** https://ngrx.io/guide/signals  
 **Package:** `@ngrx/signals` v21.1.0
 
-For this project, the simple `SectionStore` (plain Angular service with signals) is sufficient. Use NgRx Signal Store only if state grows complex (multiple entity collections, derived views, optimistic updates).
+Not a dependency today. The live single source of truth is `ScrollStateService` (`src/app/core/services/scroll-state.service.ts`) — a plain Angular service with two signals (`activeSection`, `scrollProgress`), no NgRx. `SectionStore` (`section-store.ts`, shown in an older version of this doc) is an **orphaned leftover** from the archived panel design (`docs/ROADMAP.md` Milestone 0) — do not use it as a reference. Only reach for `@ngrx/signals` if state genuinely grows complex (multiple entity collections, derived views, optimistic updates) — not the case here.
 
 ```bash
 npm install @ngrx/signals
-```
-
-```typescript
-import { signalStore, withState, withComputed, withMethods } from '@ngrx/signals';
-import { computed } from '@angular/core';
-
-export const SectionStore = signalStore(
-  { providedIn: 'root' },
-  withState({ activeSection: null as SectionId | null }),
-  withComputed(({ activeSection }) => ({
-    isPanelOpen: computed(() => activeSection() !== null),
-  })),
-  withMethods((store) => ({
-    open: (id: SectionId) => patchState(store, { activeSection: id }),
-    close: ()            => patchState(store, { activeSection: null }),
-  })),
-);
 ```
 
 ---
@@ -251,7 +248,7 @@ export const SectionStore = signalStore(
 ## gltf-transform — Model Optimisation
 
 **Docs:** https://gltf-transform.dev  
-**Package:** `@gltf-transform/cli` (v3.2.1)
+**Package:** `@gltf-transform/cli` — verified 2026-07-05: still the current/actively-maintained tool for this job; the version below was stale (checked `npm view @gltf-transform/cli version` — latest is **4.4.1**, not 3.2.1). Don't hard-pin a version in docs; use `npm install -g @gltf-transform/cli@latest` and record whatever version you actually used in `docs/ASSET_CREDITS.md` if this pipeline runs. Note: per `docs/vision/VISION.md`'s procedural-primitives recommendation, this pipeline may not be needed at all for v1 — see `docs/development/ASSET_PIPELINE.md`.
 
 ```bash
 npm install -g @gltf-transform/cli
@@ -321,40 +318,38 @@ ng test --coverage  # coverage report (includes HTML templates)
 
 ### Component test example
 
+`PanelComponent`/`SectionStore` (previously shown here) are orphaned leftovers from the archived panel design — do not use them as a reference. Follow a live, tested component instead, e.g. `src/app/ui/sections/about/about.component.spec.ts` or `src/app/core/services/device-capability.spec.ts`:
+
 ```typescript
 import { TestBed } from '@angular/core/testing';
-import { PanelComponent } from './panel.component';
-import { SectionStore } from '../../core/services/section-store';
+import { AboutComponent } from './about.component';
 
-describe('PanelComponent', () => {
+describe('AboutComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [PanelComponent],
+      imports: [AboutComponent],
     });
   });
 
-  it('should be closed by default', () => {
-    const fixture = TestBed.createComponent(PanelComponent);
+  it('should create', () => {
+    const fixture = TestBed.createComponent(AboutComponent);
     fixture.detectChanges();
-    expect(inject(SectionStore).isPanelOpen()).toBe(false);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });
 ```
 
 ### Mocking WebGL for Three.js tests
 
+This project uses **`vitest-canvas-mock`**, not `jest-webgl-canvas-mock` (there is no Jest anywhere in this repo — verified against `package.json` devDependencies, 2026-07-05):
+
 ```bash
-npm install -D jest-webgl-canvas-mock
+npm install -D vitest-canvas-mock
 ```
 
 ```typescript
 // src/test-setup.ts
-import 'jest-webgl-canvas-mock';
-```
-
-In `angular.json` test options:
-```json
-"setupFiles": ["src/test-setup.ts"]
+import 'vitest-canvas-mock';
 ```
 
 ---
@@ -368,20 +363,20 @@ In `angular.json` test options:
 npm install -g @lhci/cli@0.15.x
 ```
 
-**`lighthouserc.json`** (place at project root):
+**`lighthouserc.json`** (this is the actual file at the project root, verified 2026-07-05 — the numbers below match reality, not an example):
 ```json
 {
   "ci": {
     "collect": {
-      "url": ["http://localhost:4200/portfolio/"],
-      "numberOfRuns": 3
+      "staticDistDir": "./dist/portfolio/browser",
+      "numberOfRuns": 1
     },
     "assert": {
       "assertions": {
-        "categories:performance":    ["error", { "minScore": 0.8 }],
-        "categories:accessibility":  ["error", { "minScore": 0.9 }],
-        "categories:best-practices": ["warn",  { "minScore": 0.9 }],
-        "categories:seo":            ["warn",  { "minScore": 0.8 }]
+        "categories:performance":    ["warn",  { "minScore": 0.75 }],
+        "categories:accessibility":  ["error", { "minScore": 0.90 }],
+        "categories:best-practices": ["warn",  { "minScore": 0.85 }],
+        "categories:seo":            ["warn",  { "minScore": 0.80 }]
       }
     }
   }
@@ -399,8 +394,8 @@ Integrated into GitHub Actions — see `docs/deployment/GITHUB_INSTRUCTIONS.md`.
 | **gltf.report** | Inspect GLB mesh names, materials, textures | browser: https://gltf.report |
 | **Spline** | Web-based 3D editor (optional prototyping) | https://spline.design |
 | **Poly Haven** | Free CC0 HDRIs for environment lighting | https://polyhaven.com |
-| **Sketchfab** | Source Kakashi GLB model | https://sketchfab.com |
-| **Blender 4.x** | Rework model, re-export GLB with Draco | https://blender.org |
+| **Sketchfab** | Not needed for v1 per `VISION.md`'s procedural-primitives recommendation; only relevant if a hand-modeled GLB prop is pursued as a v2 stretch goal | https://sketchfab.com |
+| **Blender 4.x** | Only needed if a hand-modeled GLB prop is built (v2 stretch goal, not v1) | https://blender.org |
 | **Chrome DevTools Performance** | Frame rate, memory, JS profile | F12 → Performance |
 | **Three.js Stats** | FPS counter overlay (dev only) | `three/examples/jsm/libs/stats.module.js` |
 | **webpack-bundle-analyzer** | Visualise JS bundle | `npx webpack-bundle-analyzer` |

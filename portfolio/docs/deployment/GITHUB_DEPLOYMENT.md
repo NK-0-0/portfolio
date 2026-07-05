@@ -270,4 +270,4 @@ npx http-server dist/portfolio/browser -p 4200 --proxy http://localhost:4200?
 - [ ] Large assets (GLB, HDR) handled via LFS or release assets
 - [ ] Production build tested locally before push
 - [ ] `--base-href` matches actual repo name (or `/` for custom domain)
-- [ ] Footer IP attribution present for Kakashi character
+- [ ] Footer attribution is correct for whatever is actually shipping — currently still the Kakashi/Kishimoto notice (verified against `src/app/ui/footer/footer.component.ts`, 2026-07-05); once `docs/ROADMAP.md` Milestone 1 lands, this becomes either no notice (if no third-party assets are used) or an `docs/ASSET_CREDITS.md`-sourced notice — update this checklist item then

@@ -37,7 +37,7 @@ Live at `https://nk-0-0.github.io/portfolio/`.
 
 There is no Angular Router and no click-to-open-panel navigation. The entire experience is **one continuous scrollable page** (`ScrollLayoutComponent`) divided into six `<section>` elements (hero, about, experience, skills, projects, contact). Lenis provides smooth-scroll physics; GSAP `ScrollTrigger` watches scroll position and updates `ScrollStateService.activeSection` (an integer 0–5) plus a continuous `scrollProgress`. Every reactive visual — camera position, fog/light color, 3D prop transforms, parallax label/hue tweens — reads that one signal and lerps toward a per-section target value inside `injectBeforeRender`.
 
-There is deliberately no `SectionStore`/panel-open concept (that belonged to the archived hotspot design) and no hash-routing today; if deep-linking to a section is ever wanted, add it as `scrollIntoView` triggered by a hash fragment, without introducing the Angular Router.
+There is deliberately no `SectionStore`/panel-open concept (that belonged to the archived hotspot design) and no hash-routing today. **Update 2026-07-05:** deep-linking to a section via URL hash is now a confirmed, in-scope requirement (owner decision) — see `docs/vision/REQUIREMENTS.md` FR-10 and `docs/ROADMAP.md` Milestone 3, issue 3.6, for the testable spec. The guidance below is the starting architectural constraint for that work, not superseded by it: implement via `scrollIntoView`/hash-fragment triggering of the existing `ScrollStateService` signals, without introducing the Angular Router or a new `SectionStore`-style state container.
 
 ## Folder Structure (live tree only)
 

@@ -1,10 +1,12 @@
-# Development Guide — Kakashi 3D Portfolio
+# Development Guide — Signal Ghost Portfolio
+
+> **Corrected 2026-07-05.** The "Development Order" and "Installing 3D Dependencies" sections below described the *original* pre-pivot build plan (hover/hotspot raycasting, click-to-open panels, `@angular-three/core`, bloom/outline post-processing) as the recommended path — that plan was abandoned; see `docs/ROADMAP.md` for why. The app already exists in its current scroll-driven form. For **what to build next**, use `docs/ROADMAP.md`'s Milestone/issue breakdown, not the phase list below. Sections on debugging, performance monitoring, and common issues remain generally accurate and are left as-is.
 
 ## Prerequisites
 
 | Tool | Version | Notes |
 |------|---------|-------|
-| Node.js | 22 LTS | Use `nvm` or `fnm` to manage versions |
+| Node.js | 22 or 24 LTS | Node 24 became the **Active LTS** line in Oct 2025 (verified via nodejs.org release schedule, 2026-07-05); Node 22 is now in **Maintenance LTS** (EOL Apr 2027) — either works, but prefer 24 for new setups. Use `nvm` or `fnm` to manage versions |
 | npm | 11+ | Comes with Node 22 |
 | Angular CLI | 21.2+ | `npm install -g @angular/cli` |
 | gltf-transform CLI | latest | `npm install -g @gltf-transform/cli` (for model optimisation) |
@@ -30,28 +32,27 @@ npm start
 
 ---
 
-## Installing 3D Dependencies
+## 3D Dependencies (already installed — reference only)
 
-Once the project is ready to start 3D implementation:
+These are already in `package.json`; shown here for reference, not as a setup step:
 
 ```bash
-# Angular Three (NGT) + Three.js
-npm install @angular-three/core three
-npm install -D @types/three
-
-# Post-processing (bloom, outline glow)
-npm install @angular-three/postprocessing postprocessing
+# Angular Three (NGT) + Three.js — correct package name, NOT @angular-three/core
+npm install angular-three three
+npm install -D @types/three angular-three-plugin
 
 # GLTF loader helpers (included in Three.js, but useful utility)
 # No extra install needed — GLTFLoader is part of three/examples/jsm
 
-# Optional: Leva controls for debug (remove before prod)
+# Optional: Leva controls for debug (remove before prod) — not currently installed
 npm install leva
 ```
 
+**Do not install** `postprocessing` / `@angular-three/postprocessing` — `docs/vision/VISION.md`'s "What NOT To Do" explicitly forbids bloom/post-processing (mobile-perf killer, already tried once and abandoned; see `docs/ROADMAP.md` Finding 2–3).
+
 **Verify installation:**
 ```bash
-npm ls @angular-three/core three
+npm ls angular-three three
 ```
 
 ---
@@ -69,15 +70,12 @@ npm test               # Run Vitest unit tests
 
 ```bash
 # Generate a new standalone component
-ng generate component ui/panel --standalone
+ng generate component ui/sections/example --standalone
 
 # Generate a service
-ng generate service core/services/section-store
+ng generate service core/services/example
 
-# Generate a directive
-ng generate directive three/kakashi/kakashi-hotspot
-
-# Lint (add ESLint first if not present)
+# Lint (no ESLint config exists yet in this repo — docs/ROADMAP.md Milestone 0, issue 0.7)
 npx ng lint
 
 # Analyse bundle size
@@ -89,49 +87,7 @@ npx webpack-bundle-analyzer dist/portfolio/browser/stats.json
 
 ## Development Order (Recommended Sequence)
 
-Work in this order to avoid building on a broken foundation:
-
-### Phase 1: Infrastructure
-1. Migrate SSR → static (see `../deployment/GITHUB_DEPLOYMENT.md` Part 1)
-2. Install NGT and Three.js
-3. Scaffold `SectionStore` signal service
-4. Scaffold `DeviceCapabilityService`
-5. Set up `AppComponent` with `@if` to switch between 3D scene and fallback
-6. Verify `ng build` still passes after each step
-
-### Phase 2: 3D Scene (Placeholder)
-7. Create `SceneComponent` with NGT canvas + basic lighting
-8. Load a **placeholder** GLB (a free generic character from Mixamo or Sketchfab)
-9. Verify the model renders correctly in the browser
-10. Add `OrbitControls` temporarily (for development inspection — remove before prod)
-11. Add post-processing: bloom first, then outline
-
-### Phase 3: Interaction
-12. Implement `KakashiHotspotDirective` with raycasting
-13. Wire hover → OutlinePass target change
-14. Wire click → `SectionStore.open()`
-15. Verify all 4–5 hotspots fire the correct section IDs
-
-### Phase 4: UI Panels
-16. Build `PanelComponent` with Angular animations (slide in/out)
-17. Build each section component (About, Experience, Skills, Projects, Contact)
-18. Populate with placeholder content
-19. Style consistently with design direction from `../vision/VISION.md`
-
-### Phase 5: Real Model
-20. Source and optimise the real Kakashi GLB (see `ASSET_PIPELINE.md` in this folder)
-21. Update `HOTSPOT_MAP` with real mesh names from the model
-22. Tune lighting and post-processing for the final model's materials
-
-### Phase 6: Mobile Fallback
-23. Implement `FallbackComponent` (standard responsive layout)
-24. Test on real mobile device / DevTools mobile emulation
-
-### Phase 7: Polish and Deploy
-25. Replace placeholder content with real portfolio content
-26. Performance audit (Lighthouse, bundle size)
-27. Deploy to GitHub Pages (see `../deployment/GITHUB_DEPLOYMENT.md`)
-28. Test the live URL on multiple browsers
+**This section previously listed a from-scratch build order (SSR migration, hotspot/raycast interaction, click-open panels) for a design that was abandoned mid-build.** The app already exists in its current, working scroll-driven form (static output, `ScrollStateService`-driven lerps, no panels/hotspots). For "what to build next," use `docs/ROADMAP.md`'s Milestone 0–4 breakdown instead — it sequences the actual remaining work (repo hygiene → IP-asset removal → new asset pipeline → scroll-experience retarget on the new theme → content/testing/launch) and explains why that ordering matters (the original stall came from skipping the checkpoint where a risky slice gets validated before the next layer is built on top of it).
 
 ---
 

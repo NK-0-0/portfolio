@@ -199,7 +199,7 @@ jobs:
           temporaryPublicStorage: true    # Posts a URL to the PR with results
 ```
 
-**`portfolio/lighthouserc.json`:**
+**`portfolio/lighthouserc.json`** (this is the actual current file, verified 2026-07-05 — it also has a `seo` assertion that a previous version of this doc omitted):
 ```json
 {
   "ci": {
@@ -211,14 +211,15 @@ jobs:
       "assertions": {
         "categories:performance":    ["warn",  { "minScore": 0.75 }],
         "categories:accessibility":  ["error", { "minScore": 0.90 }],
-        "categories:best-practices": ["warn",  { "minScore": 0.85 }]
+        "categories:best-practices": ["warn",  { "minScore": 0.85 }],
+        "categories:seo":            ["warn",  { "minScore": 0.80 }]
       }
     }
   }
 }
 ```
 
-> **Note on performance score:** A 3D WebGL portfolio will score lower than a standard site on Lighthouse performance (large JS chunk, WebGL initialization). Set `minScore: 0.75` initially and tighten as you optimise. Accessibility must be 0.90+ — the 2D fallback makes this achievable.
+> **Note on performance score:** A 3D WebGL portfolio will score lower than a standard site on Lighthouse performance (large JS chunk, WebGL initialization). `minScore: 0.75` is a `warn`, not `error`, for exactly this reason — tighten it once optimized. Accessibility is the only `error`-level gate (0.90+) — the 2D fallback makes this achievable.
 
 ---
 
