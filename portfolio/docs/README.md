@@ -1,6 +1,14 @@
 # docs — Documentation Index
 
-All documentation for the Kakashi 3D Portfolio project.
+All documentation for the Signal Ghost portfolio project (relaunch of the original Kakashi/Naruto fan-art concept — see `ROADMAP.md` for why).
+
+---
+
+## Root
+
+| File | Contents |
+|------|----------|
+| [ROADMAP.md](ROADMAP.md) | Diagnosis of why the original build stalled, plus the milestone/issue breakdown for the relaunch. Read this first if you're wondering "what happened here" or "what's next." |
 
 ---
 
@@ -9,7 +17,7 @@ All documentation for the Kakashi 3D Portfolio project.
 
 | File | Contents |
 |------|----------|
-| [VISION.md](vision/VISION.md) | Project concept, Kakashi body part → section mapping, visual design direction, content outline, IP notice |
+| [VISION.md](vision/VISION.md) | Current concept ("Signal Ghost" original sci-fi theme), palette, materials/lighting, typography, per-section scroll beat sheet, 3D prop concepts, motion/performance guardrails, IP posture |
 
 ---
 
@@ -18,8 +26,18 @@ All documentation for the Kakashi 3D Portfolio project.
 
 | File | Contents |
 |------|----------|
-| [ARCHITECTURE.md](architecture/ARCHITECTURE.md) | Tech stack decisions (NGT, Three.js, signals), folder structure, state management, interaction flow, mobile fallback pattern |
+| [ARCHITECTURE.md](architecture/ARCHITECTURE.md) | Current tech stack decisions (angular-three, Three.js, signals), live folder structure, state management, interaction flow, mobile fallback pattern |
 | [SKILLS_REFERENCE.md](architecture/SKILLS_REFERENCE.md) | Every library with install commands, key API snippets, dev tools, browser support targets |
+
+---
+
+## archive/
+> *Superseded designs, kept for historical record only*
+
+| File | Contents |
+|------|----------|
+| [LEGACY_VISION.md](archive/LEGACY_VISION.md) | The original Kakashi hover/hotspot concept — abandoned mid-build, do not implement |
+| [LEGACY_ARCHITECTURE.md](archive/LEGACY_ARCHITECTURE.md) | The original architecture doc for that abandoned design, including a wrong package name |
 
 ---
 
@@ -47,9 +65,10 @@ All documentation for the Kakashi 3D Portfolio project.
 ## Quick links by role
 
 **Starting the project for the first time:**
-1. [VISION.md](vision/VISION.md) — understand the concept
-2. [ARCHITECTURE.md](architecture/ARCHITECTURE.md) — understand the stack
-3. [DEVELOPMENT.md](development/DEVELOPMENT.md) — set up locally
+1. [ROADMAP.md](ROADMAP.md) — understand what happened and what's next
+2. [VISION.md](vision/VISION.md) — understand the concept
+3. [ARCHITECTURE.md](architecture/ARCHITECTURE.md) — understand the stack
+4. [DEVELOPMENT.md](development/DEVELOPMENT.md) — set up locally
 
 **Working on the 3D scene:**
 → [ARCHITECTURE.md](architecture/ARCHITECTURE.md) + [SKILLS_REFERENCE.md](architecture/SKILLS_REFERENCE.md) + [ASSET_PIPELINE.md](development/ASSET_PIPELINE.md)
