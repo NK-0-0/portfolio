@@ -1,12 +1,12 @@
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-const TOTAL_ASSETS = 3; // ANBU mask + Icha Icha book + kunai
+const TOTAL_ASSETS = 2; // Icha Icha book + kunai (HUD-core is procedural — no GLB)
 const TIMEOUT_MS   = 20_000; // Force-dismiss after 20 s if a model fails to load
 
 /**
  * Tracks GLB download completion across the live scene's loaded models
- * (MaskComponent + FloatingModelsComponent's book and kunai).
+ * (FloatingModelsComponent's book and kunai — HUD-core is procedural, no GLB).
  * SceneComponent reads allLoaded to know when to dismiss the loading screen.
  *
  * Uses a timeout fallback so the loader never blocks forever if a model 404s
