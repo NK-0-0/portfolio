@@ -61,7 +61,7 @@ export class FloatingModelsComponent {
   #elapsed = 0;
 
   constructor() {
-    injectBeforeRender(({ delta, clock }) => {
+    injectBeforeRender(({ delta }) => {
       if (!this.isBrowser) return;
 
       this.#elapsed += delta;

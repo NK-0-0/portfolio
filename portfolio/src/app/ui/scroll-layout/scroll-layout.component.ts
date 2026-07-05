@@ -259,7 +259,7 @@ export class ScrollLayoutComponent implements OnDestroy {
       gsap.set(el, { opacity: 0, x: isLeft ? -65 : 65, rotateY: isLeft ? -14 : 14 });
     });
 
-    cards.forEach(({ el, isLeft }, i) => {
+    cards.forEach(({ el }, i) => {
       gsap.to(el, {
         opacity: 1, x: 0, rotateY: 0,
         ease: 'power3.out',

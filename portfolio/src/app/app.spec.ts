@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { PLATFORM_ID } from '@angular/core';
 import { App } from './app';
 
@@ -8,7 +7,6 @@ describe('App', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
-        provideRouter([]),
         // Server platform: DeviceCapabilityService returns false, 3D skipped
         { provide: PLATFORM_ID, useValue: 'server' },
       ],
