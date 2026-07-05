@@ -6,6 +6,10 @@
 /out-tsc
 /bazel-out
 
+# Scratch/staging area for raw, unoptimized sourced assets — never commit.
+# Only optimized output that lands in public/models/ gets committed.
+/assets-staging
+
 # Node
 /node_modules
 npm-debug.log
