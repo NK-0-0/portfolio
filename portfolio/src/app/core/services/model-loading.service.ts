@@ -5,7 +5,8 @@ const TOTAL_ASSETS = 3; // ANBU mask + Icha Icha book + kunai
 const TIMEOUT_MS   = 20_000; // Force-dismiss after 20 s if a model fails to load
 
 /**
- * Tracks GLB download completion across KakashiComponent and MaskComponent.
+ * Tracks GLB download completion across the live scene's loaded models
+ * (MaskComponent + FloatingModelsComponent's book and kunai).
  * SceneComponent reads allLoaded to know when to dismiss the loading screen.
  *
  * Uses a timeout fallback so the loader never blocks forever if a model 404s
