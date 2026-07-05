@@ -8,6 +8,10 @@ Raw, unoptimized sourced assets (Sketchfab/PolyHaven downloads, Blender exports,
 
 This replaces the old misspelled `assests/` folder, which was 9 raw/duplicate files (~24MB) accidentally committed to git with no staging discipline — removed in Milestone 0.4. Run the optimization pipeline (below) from `assets-staging/` and copy only the final GLB into `public/models/<category>/`.
 
+## Naming convention for new assets (required)
+
+Every new asset committed to `public/` must be `public/models/<category>/<theme-neutral-name>.glb` (or the matching subtree for non-GLB assets — HDRIs in `public/env/`, textures in `public/textures/`). Both `<category>` and `<theme-neutral-name>` are lowercase `kebab-case`, describe the asset by its *function or generic form*, and must not encode any third-party character, franchise, or lore (`docs/vision/VISION.md` IP Posture). This is the rule the old assets violated in the filename itself — e.g. `kunai_do_minato_namikaze.glb` and `anbu_kakashi_mask.glb` named Naruto characters; the Signal Ghost equivalents are `public/models/drone/scout-drone.glb` or `public/models/hud/hud-core.glb`. Record each new file's source, license, and attribution in `docs/ASSET_CREDITS.md` when it lands (see Milestone 2.5).
+
 ---
 
 ## The Model Problem **[historical — described the archived character-sourcing workflow]**
