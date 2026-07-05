@@ -8,16 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 An Angular 21 static, scroll-driven 3D portfolio deployed to GitHub Pages. Lenis (smooth scroll) + GSAP ScrollTrigger drive a single continuous page (`ScrollLayoutComponent`) through six sections (hero, about, experience, skills, projects, contact). A fixed WebGL canvas sits behind the scrollable content; as the user scrolls, `ScrollStateService.activeSection` updates and every 3D component (mask position/scale/opacity, floating book/kunai props, moonlight/rim light color, fog color, camera Y, fixed background hue) lerps to new per-section target values read from that one signal. On mobile or when WebGL is unavailable, `DeviceCapabilityService` switches the root to a 2D `FallbackComponent` instead.
 
-**Docs status (updated 2026-07-04):** `docs/vision/VISION.md` and `docs/architecture/ARCHITECTURE.md` have been rewritten to match the current scroll-driven architecture described below, and now also describe the planned rebrand away from the Kakashi/Naruto fan-IP theme toward an original "Signal Ghost" sci-fi identity (see `docs/vision/VISION.md`). The old hover/hotspot/`SectionStore` design they used to describe is archived at `docs/archive/LEGACY_VISION.md` / `LEGACY_ARCHITECTURE.md` for historical record — do not implement anything from those. `docs/development/AGENTS.md` still has not been corrected (stale package-name/architecture references) — see `docs/ROADMAP.md` Milestone 0. `docs/ROADMAP.md` is new and holds the full stall diagnosis plus the milestone/issue plan for the rework; read it for "why" and "what's next." This file remains the terse day-to-day source of truth and takes precedence if anything ever drifts again.
+**Docs status (updated 2026-07-05):** `docs/vision/VISION.md` and `docs/architecture/ARCHITECTURE.md` have been rewritten to match the current scroll-driven architecture described below, and now also describe the planned rebrand away from the Kakashi/Naruto fan-IP theme toward an original "Signal Ghost" sci-fi identity (see `docs/vision/VISION.md`, and `docs/vision/REQUIREMENTS.md` for that brief turned into testable FR/NFR acceptance criteria). The old hover/hotspot/`SectionStore` design they used to describe is archived at `docs/archive/LEGACY_VISION.md` / `LEGACY_ARCHITECTURE.md` for historical record — do not implement anything from those. `docs/development/AGENTS.md`, `docs/architecture/SKILLS_REFERENCE.md`, `docs/development/ASSET_PIPELINE.md`, and `docs/development/DEVELOPMENT.md` have now all been corrected for the staleness `docs/ROADMAP.md` Milestone 0 flagged (and some it didn't — see `docs/vision/REQUIREMENTS.md`'s feasibility log). `docs/ROADMAP.md` holds the full stall diagnosis plus the milestone/issue plan for the rework; read it for "why" and "what's next." This file remains the terse day-to-day source of truth and takes precedence if anything ever drifts again.
 
 **Rebrand in flight — the theme is changing, the architecture is not.** The live scene graph and asset filenames described below (Kakashi mask, Icha Icha book, kunai) are still what's actually running today; they are being replaced per `docs/vision/VISION.md` and `docs/ROADMAP.md` Milestones 1–3 with original, non-IP assets and a new palette/typography. Don't be surprised if this section reads as already-outdated soon — check `docs/ROADMAP.md` for current milestone status before assuming which asset set is live.
 
-As a result of that pivot, several files still exist in `src/` but are **not referenced anywhere** in the live component tree — verify with a repo-wide grep before assuming a file matters:
-- `three/kakashi/kakashi.component.ts` (the original single Kakashi model)
-- `three/post-processing/effects.component.ts` (OutlinePass/Bloom, driven by hover state that nothing sets anymore)
-- `core/services/section-store.ts` (`SectionStore` — panel-open state)
-- `ui/panel/panel.component.ts` (the sliding content panel)
-- `ui/hint/hint.component.ts` ("Hover Kakashi to explore" hint)
+As a result of that pivot, the old hover/hotspot-era files were **deleted** from `src/` in Milestone 0.2 — the original `three/kakashi/` model, `three/post-processing/` (OutlinePass/Bloom), `core/services/section-store.ts` (`SectionStore`), `ui/panel/` (sliding panel), and `ui/hint/` ("Hover Kakashi to explore"). They are gone, not merely orphaned; do not reintroduce them.
 
 The live 3D scene graph (`scene-graph.component.ts`) is: `SceneController` (fog + camera) → `Lighting` → `Mask` → `FloatingModels` (book + kunai) → `Particles`. The live content layer is `ScrollLayoutComponent`, which renders the six `<section>`s directly (not through `PanelComponent`).
 
@@ -41,8 +36,9 @@ ng build --configuration production --base-href /portfolio/
 # Unit tests (Vitest, watch mode)
 npm test
 
-# Single/CI test run
-ng test --run
+# Single/CI test run (this build's Vitest unit-test builder has no `--run` flag;
+# watch also defaults to false in non-TTY/CI environments)
+ng test --no-watch
 
 # E2E (Playwright) — NOTE: playwright.config.ts baseURL is the *live* production
 # site (https://nk-0-0.github.io), not localhost. These are post-deploy smoke
@@ -54,7 +50,7 @@ ng build --configuration production
 npx lhci autorun
 ```
 
-There is no lint script configured (no ESLint). Formatting is Prettier (`.prettierrc`: single quotes, 100 print width).
+Lint is `npm run lint` (`ng lint`, angular-eslint flat config in `eslint.config.js`) — added in Milestone 0.7 and run in CI (`.github/workflows/ci.yml`). Formatting is Prettier (`.prettierrc`: single quotes, 100 print width).
 
 ---
 
@@ -68,7 +64,6 @@ src/app/
                                     # source of truth every 3D component reads
       device-capability.ts         # WebGL + mobile detection -> 2D fallback switch
       model-loading.service.ts     # Tracks GLB load count across mask/floating-models
-      section-store.ts             # ORPHANED — see note above
     models/
       section.types.ts             # SectionId, Section, SECTIONS (used for nav labels)
   three/
@@ -81,8 +76,6 @@ src/app/
     environment/
       lighting.component.ts        # Moonlight + rim directional lights, color-lerped per section
       particles.component.ts       # Ambient dust
-    kakashi/                       # ORPHANED — see note above
-    post-processing/               # ORPHANED — see note above
   ui/
     scroll-layout/                 # THE page: Lenis + GSAP ScrollTrigger, all 6 sections,
                                     # parallax kanji/labels/hue tween, sets ScrollStateService
@@ -90,17 +83,16 @@ src/app/
     fallback/                      # 2D layout for mobile / no-WebGL
     loader/                        # Loading screen while GLBs fetch
     footer/                        # Fixed attribution footer (Kakashi IP notice)
-    panel/, hint/                  # ORPHANED — see note above
   app.ts                           # Root: @defer-switches between <app-scene> and <app-fallback>
 
 public/
   models/
-    kakashi/kakashi.glb            # unused by the live scene graph (see kakashi/ note above)
+    kakashi/kakashi.glb            # unused by the live scene graph; slated for removal in Milestone 1.1
     mask/anbu_kakashi_mask.glb
     book/icha_icha.glb
     kunai/kunai_do_minato_namikaze.glb
 
-docs/                              # STALE — see note above; do not treat as current
+docs/                              # corrected 2026-07-05 (see opening paragraph + docs/README.md)
 ```
 
 ---
@@ -139,6 +131,8 @@ npm install -D angular-three-plugin
 ```
 Key imports used in this codebase: `NgtCanvas` (from `angular-three/dom`), `NgtArgs`, `injectLoader`, `injectBeforeRender`, `injectStore` (from `angular-three`).
 
+**Deprecation note (verified against the installed `angular-three@4.2.2` type definitions, 2026-07-05):** `injectLoader` and `injectBeforeRender` are marked `@deprecated` in this version — superseded by `loaderResource()` and `beforeRender()`, scheduled for removal in v5. They still work today; `injectStore` is unaffected. Don't add *new* components against the deprecated names — see `docs/vision/REQUIREMENTS.md` NFR-8 and `docs/ROADMAP.md` Milestone 3, issue 3.5 (migrating the existing ones is scheduled there, not urgent).
+
 ### Per-frame animation pattern
 Every animated 3D component follows the same shape: load the GLB with `injectLoader(() => GLTFLoader, () => 'models/.../file.glb')`, keep interpolated transform values as plain (non-signal) instance fields, and mutate the `Object3D` directly inside a single `injectBeforeRender(({ delta }) => { ... })` callback using `current += (target - current) * Math.min(delta * k, 1)` lerps keyed off `ScrollStateService.activeSection()`. See `mask.component.ts` and `floating-models.component.ts` for the canonical example before adding a new animated prop.
 
@@ -168,10 +162,10 @@ Don't test NGT rendering output — test the *behaviour* (e.g. that a service si
 
 ## What NOT to Do
 
-- Do not re-enable SSR. The project is static-only for GitHub Pages. `outputMode: "static"` in `angular.json` is intentional, even though `@angular/ssr`, `@angular/platform-server`, and `express` are still present in `package.json` as leftover scaffolding.
+- Do not re-enable SSR. The project is static-only for GitHub Pages. `outputMode: "static"` in `angular.json` is intentional. The old SSR/Node scaffolding (`@angular/ssr`, `@angular/platform-server`, `express`, `@types/express`, the `serve:ssr:portfolio` script) was removed in Milestone 0.6 — do not add it back. Note `@angular/router` is still a dependency: `angular-three` statically imports it (for `NgtRoutedScene`), so the build won't resolve without it even though this app defines no routes.
 - Do not place large binaries (GLB, HDR) in `src/assets/` — use `public/` so they bypass the Angular build pipeline.
 - Do not exceed the raised bundle budget in `angular.json` (2MB warning / 4MB error). Three.js is lazy-loaded via `@defer` in `app.ts` — keep it that way.
-- Do not resurrect the orphaned hover/hotspot files (`kakashi.component.ts`, `panel.component.ts`, `effects.component.ts`, `section-store.ts`, `hint.component.ts`) as if they were live — confirm with a grep for their usage before modifying them, since edits there currently have no effect on the running app.
+- Do not re-create the deleted hover/hotspot files (`kakashi.component.ts`, `panel.component.ts`, `effects.component.ts`, `section-store.ts`, `hint.component.ts`) — they were removed in Milestone 0.2 and nothing in the live app depends on them.
 - Do not add OrbitControls or Leva debug controls to production code paths.
 
 ---

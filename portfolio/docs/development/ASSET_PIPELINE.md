@@ -1,6 +1,16 @@
 # Asset Pipeline — 3D Model Sourcing and Optimisation
 
-## The Model Problem
+> **Superseded for v1 — corrected 2026-07-05.** This entire document describes sourcing a licensed fan-model of a copyrighted character (Kakashi Hatake) from Sketchfab. That workflow is exactly the pattern that put the project in an IP-risk position in the first place (`docs/ROADMAP.md` Finding 5–6, 9) and directly contradicts `docs/vision/VISION.md`'s IP Posture (no third-party character IP; CC0/OFL/Apache-only assets) and its explicit recommendation to ship all three new props (HUD-core, data-shard, drone) as **procedural Three.js geometry with zero GLBs for v1**. Do not use Steps 1–2 below (Sketchfab sourcing, hotspot mesh-name mapping) for the Signal Ghost rebuild. **Steps 3 (gltf-transform optimisation) and the HDRI/font sourcing notes remain valid reference** for the v2-stretch scenario where a hand-modeled GLB prop or a new HDRI is added — see `docs/vision/REQUIREMENTS.md` for the current, testable asset budget. The `gltf-transform` CLI version pinned below (3.2.1) is stale — latest as of this correction is 4.4.1 (verified via `npm view @gltf-transform/cli version`); don't hard-pin a version, use `@latest` and record what you actually used in `docs/ASSET_CREDITS.md`.
+
+## Scratch-asset staging convention (current)
+
+Raw, unoptimized sourced assets (Sketchfab/PolyHaven downloads, Blender exports, hash-named files) must be staged in a gitignored `assets-staging/` directory at the project root — **download raw/unoptimized sourced assets here; never commit this directory; only commit the optimized output that lands in `public/models/`.** `assets-staging/` is listed in `.gitignore`.
+
+This replaces the old misspelled `assests/` folder, which was 9 raw/duplicate files (~24MB) accidentally committed to git with no staging discipline — removed in Milestone 0.4. Run the optimization pipeline (below) from `assets-staging/` and copy only the final GLB into `public/models/<category>/`.
+
+---
+
+## The Model Problem **[historical — described the archived character-sourcing workflow]**
 
 This is the **highest-risk item in the project.** A browser-delivered 3D model must be:
 
@@ -38,11 +48,13 @@ This is the **highest-risk item in the project.** A browser-delivered 3D model m
 Download the GLB (or GLTF + textures). Open it for inspection before any optimisation:
 
 ```bash
-# Install gltf-transform CLI globally
-npm install -g @gltf-transform/cli
+# gltf-transform is a local devDependency (added in Milestone 0.5) — no global install.
+# Installed here as @gltf-transform/cli@4.4.1; don't hard-pin in docs, use @latest and
+# record the actual version (per REQUIREMENTS.md NFR-8):
+npm install -D @gltf-transform/cli@latest
 
-# Inspect the model
-gltf-transform inspect kakashi-original.glb
+# Inspect a model (run via npx so it resolves the local install)
+npx gltf-transform inspect assets-staging/model-raw.glb
 ```
 
 This prints:
@@ -70,19 +82,27 @@ const HOTSPOT_MAP: Record<string, SectionId> = {
 
 Run the full optimisation pipeline:
 
-```bash
-# Install KTX2 / Draco support
-npm install -g @gltf-transform/cli
+Use the `optimize:models` npm script (added in Milestone 0.5), which wraps the full
+Draco geometry + KTX2 texture pipeline. Pass input and output after `--`:
 
-# Full pipeline: Draco geometry compression + KTX2 texture compression
-gltf-transform optimize kakashi-original.glb kakashi.glb \
-  --compress draco \
-  --texture-compress ktx2 \
-  --texture-resize 1024
+```bash
+# Draco geometry compression + KTX2 texture compression + 1024px texture cap
+npm run optimize:models -- assets-staging/model-raw.glb public/models/<category>/<name>.glb
+
+# The script expands to:
+#   gltf-transform optimize <in> <out> --compress draco --texture-compress ktx2 --texture-size 1024
+# NOTE (verified against @gltf-transform/cli@4.4.1): the flag is --texture-size, not the
+# older --texture-resize this doc used to show.
 
 # Inspect result
-gltf-transform inspect kakashi.glb
+npx gltf-transform inspect public/models/<category>/<name>.glb
 ```
+
+> **KTX2 needs an external binary.** `--texture-compress ktx2` shells out to the KhronosGroup
+> KTX-Software `ktx` CLI, which must be on your PATH (`command -v ktx`). If it isn't installed,
+> the run fails at the `uastc`/`etc1s` step. Either install KTX-Software, or use the documented
+> fallback `--texture-compress webp` (no external binary; still ~95%+ smaller than raw PNG/JPEG
+> textures — a smoke test on `anbu_kakashi_mask.glb` went 2.91 MB → 98 KB via the webp path).
 
 **Target output:**
 - Geometry: Draco-compressed (saves 50–80% on geometry data)
@@ -135,10 +155,10 @@ The loader component (`src/app/ui/loader/`) displays a styled loading animation 
 
 | Asset | Purpose | Source |
 |-------|---------|--------|
-| Leaf particle texture | Environment particles | Any simple PNG, make yourself |
+| Signal-static particle texture | Environment particles | Any simple PNG, make yourself — or keep the current procedural `BufferGeometry`/`PointsMaterial` approach (`VISION.md` Materials & Lighting), which needs no texture asset at all |
 | HDRI environment map | Image-based lighting | [polyhaven.com](https://polyhaven.com) — free, CC0 |
-| Font files | UI typography | Google Fonts CDN or self-host |
-| Favicon | Browser tab | Export from the Sharingan design |
+| Font files | UI typography | Google Fonts CDN or self-host — Chakra Petch / Rajdhani / Inter (SIL OFL 1.1) / JetBrains Mono (SIL OFL 1.1 font, Apache-2.0 source), all verified still on Google Fonts under those licenses as of 2026-07-05 |
+| Favicon | Browser tab | Original design only — do not derive from any third-party character IP (see `VISION.md` IP Posture) |
 
 ### HDRI for lighting
 Download a low-res HDRI from Poly Haven (512px is enough for reflections):
@@ -185,7 +205,16 @@ If textures are not PBR (e.g., just a diffuse colour), the model will look flat 
 | Three.js + NGT (lazy chunk) | < 2 MB |
 | **Total page weight (first load)** | **< 6 MB** |
 
-Monitor this during development with:
+### Automated enforcement (Milestone 0.5/0.7)
+
+The **per-GLB budget (3 MB)** is enforced in CI, not just documented: `npm run check:glb-budget`
+(`scripts/check-glb-budget.mjs`) fails the build if any `public/models/**/*.glb` exceeds 3 MB.
+It runs as a step in `.github/workflows/ci.yml`. The orphaned `public/models/kakashi/kakashi.glb`
+(8.35 MB) is temporarily exempted in that script — remove its exception entry the moment the
+file is deleted in Milestone 1.1 so the gate stays honest.
+
+The JS-bundle side is covered separately by `angular.json`'s existing 2 MB/4 MB budgets. Inspect
+bundle composition during development with:
 ```bash
 ng build --stats-json
 npx webpack-bundle-analyzer dist/portfolio/browser/stats.json
