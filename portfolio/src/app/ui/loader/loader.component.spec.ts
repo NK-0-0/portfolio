@@ -42,7 +42,7 @@ describe('LoaderComponent', () => {
     fixture.componentRef.setInput('progress', 0);
     fixture.detectChanges();
     const status = fixture.nativeElement.querySelector('.loader__status');
-    expect(status.textContent).toContain('Summoning');
+    expect(status.textContent).toContain('Initialising');
   });
 
   it('has an accessible progressbar role', () => {

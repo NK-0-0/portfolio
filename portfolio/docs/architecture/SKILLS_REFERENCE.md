@@ -116,8 +116,8 @@ import { injectLoader } from 'angular-three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 @Component({...})
-export class MaskComponent {
-  readonly gltf = injectLoader(() => GLTFLoader, () => '/models/mask/anbu_kakashi_mask.glb');
+export class FocalPropComponent {
+  readonly gltf = injectLoader(() => GLTFLoader, () => '/models/hud/hud-core.glb');
   // gltf() is null until loaded; use @if (gltf()) in template
 }
 
@@ -254,24 +254,24 @@ npm install @ngrx/signals
 npm install -g @gltf-transform/cli
 
 # Inspect a model
-gltf-transform inspect kakashi-original.glb
+gltf-transform inspect model-raw.glb
 
 # Full optimisation: Draco geometry + KTX2 textures + resize
-gltf-transform optimize kakashi-original.glb kakashi.glb \
+gltf-transform optimize model-raw.glb model.glb \
   --compress draco \
   --texture-compress ktx2 \
   --texture-resize 1024
 
 # Fallback if KTX2 fails (WebP is still much smaller than PNG)
-gltf-transform optimize kakashi-original.glb kakashi.glb \
+gltf-transform optimize model-raw.glb model.glb \
   --compress draco \
   --texture-compress webp
 
 # Draco only (if KTX2 not needed)
-gltf-transform draco kakashi-original.glb kakashi.glb --method edgebreaker
+gltf-transform draco model-raw.glb model.glb --method edgebreaker
 ```
 
-**Target:** final GLB < 3MB. Inspect result size with `ls -lh kakashi.glb`.
+**Target:** final GLB < 3MB. Inspect result size with `ls -lh model.glb`.
 
 ---
 

@@ -18,11 +18,11 @@ describe('FooterComponent', () => {
     expect(footer).not.toBeNull();
   });
 
-  it('contains the Masashi Kishimoto attribution', () => {
+  it('renders a copyright line with the current year', () => {
     const text: string = fixture.nativeElement.textContent;
-    expect(text).toContain('Masashi Kishimoto');
-    expect(text).toContain('Studio Pierrot');
-    expect(text).toContain('Fan work');
+    expect(text).toContain('©');
+    expect(text).toContain(String(new Date().getFullYear()));
+    expect(text).toContain('All rights reserved');
   });
 
   it('has the correct ARIA role', () => {

@@ -13,7 +13,7 @@ import { ScrollStateService } from '../../core/services/scroll-state.service';
 /**
  * HUD-core — the primary 3D focal element (procedural, no GLB).
  *
- * Replaces the ANBU mask. A near-black faceted "glass artifact" core with two
+ * The primary focal prop. A near-black faceted "glass artifact" core with two
  * thin emissive rings that read as visible circuitry (Signal Ghost direction).
  *
  * Per FR-3, the emissive channel lives ONLY on the thin overlay rings; the body

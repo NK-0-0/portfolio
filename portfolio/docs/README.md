@@ -1,6 +1,6 @@
 # docs — Documentation Index
 
-All documentation for the Signal Ghost portfolio project (relaunch of the original Kakashi/Naruto fan-art concept — see `ROADMAP.md` for why).
+All documentation for the Signal Ghost portfolio project (a relaunch of an earlier fan-art concept that was retired for IP reasons — see `ROADMAP.md` for why).
 
 ---
 
@@ -37,7 +37,7 @@ All documentation for the Signal Ghost portfolio project (relaunch of the origin
 
 | File | Contents |
 |------|----------|
-| [LEGACY_VISION.md](archive/LEGACY_VISION.md) | The original Kakashi hover/hotspot concept — abandoned mid-build, do not implement |
+| [LEGACY_VISION.md](archive/LEGACY_VISION.md) | The original hover/hotspot concept — abandoned mid-build, do not implement |
 | [LEGACY_ARCHITECTURE.md](archive/LEGACY_ARCHITECTURE.md) | The original architecture doc for that abandoned design, including a wrong package name |
 
 ---

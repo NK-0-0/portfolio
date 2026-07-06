@@ -14,7 +14,7 @@ import { ScrollStateService } from '../../core/services/scroll-state.service';
 /**
  * Drone / signal-module — the Skills + Projects floating prop (procedural, no GLB).
  *
- * Replaces the kunai GLB. An `IcosahedronGeometry` core with four radiating
+ * The Skills + Projects floating prop. An `IcosahedronGeometry` core with four radiating
  * `BoxGeometry` struts capped by small emissive nodes — a satellite/relay
  * silhouette that stays visually distinct from HUD-core (torus-ringed focal) and
  * the data-shard (flat tablet).
@@ -26,8 +26,8 @@ import { ScrollStateService } from '../../core/services/scroll-state.service';
  * the cyan↔magenta beat-sheet rim/fog axis — recolouring the 3D rim/fog to the
  * new axis is Milestone 3's job, not this swap).
  *
- * Position/scale/opacity and the idle spin are a like-for-like copy of the old
- * kunai target block so this changes *what* renders, not *when/where* it moves.
+ * Position/scale/opacity and the idle spin preserve the previous prop's
+ * per-section targets, so this changes *what* renders, not *when/where* it moves.
  */
 const BODY_COLOR = 0x1a1e27; // matte gunmetal
 const SKILLS_GREEN = 0x39ff9d;
@@ -65,7 +65,7 @@ export class DroneComponent {
   constructor() {
     if (this.isBrowser) {
       this.#group = this.#buildDrone();
-      // Reused verbatim from the old kunai's first-frame park position.
+      // Off-screen first-frame park position; lerped in once Skills/Projects is active.
       this.#group.position.set(8, 2.0, -1.5);
       this.drone.set(this.#group);
     }
@@ -76,7 +76,7 @@ export class DroneComponent {
       this.#elapsed += delta;
       const section = this.#scrollState.activeSection();
 
-      // Reused verbatim from floating-models kunai target block.
+      // Visible only in the Skills (index 3) and Projects (index 4) sections.
       const targetOpacity = section === 3 || section === 4 ? 1.0 : 0.0;
       this.#opacity += (targetOpacity - this.#opacity) * Math.min(delta * 2.5, 1);
 

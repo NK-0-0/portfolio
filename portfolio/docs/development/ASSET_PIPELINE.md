@@ -1,6 +1,6 @@
 # Asset Pipeline — 3D Model Sourcing and Optimisation
 
-> **Superseded for v1 — corrected 2026-07-05.** This entire document describes sourcing a licensed fan-model of a copyrighted character (Kakashi Hatake) from Sketchfab. That workflow is exactly the pattern that put the project in an IP-risk position in the first place (`docs/ROADMAP.md` Finding 5–6, 9) and directly contradicts `docs/vision/VISION.md`'s IP Posture (no third-party character IP; CC0/OFL/Apache-only assets) and its explicit recommendation to ship all three new props (HUD-core, data-shard, drone) as **procedural Three.js geometry with zero GLBs for v1**. Do not use Steps 1–2 below (Sketchfab sourcing, hotspot mesh-name mapping) for the Signal Ghost rebuild. **Steps 3 (gltf-transform optimisation) and the HDRI/font sourcing notes remain valid reference** for the v2-stretch scenario where a hand-modeled GLB prop or a new HDRI is added — see `docs/vision/REQUIREMENTS.md` for the current, testable asset budget. The `gltf-transform` CLI version pinned below (3.2.1) is stale — latest as of this correction is 4.4.1 (verified via `npm view @gltf-transform/cli version`); don't hard-pin a version, use `@latest` and record what you actually used in `docs/ASSET_CREDITS.md`.
+> **Superseded for v1 — corrected 2026-07-05.** This entire document originally described sourcing a licensed fan-model of a copyrighted character from Sketchfab (that character IP was removed in Milestone 1; see `docs/ASSET_CREDITS.md`). That workflow is exactly the pattern that put the project in an IP-risk position in the first place (`docs/ROADMAP.md` Finding 5–6, 9) and directly contradicts `docs/vision/VISION.md`'s IP Posture (no third-party character IP; CC0/OFL/Apache-only assets) and its explicit recommendation to ship all three new props (HUD-core, data-shard, drone) as **procedural Three.js geometry with zero GLBs for v1**. Do not use Steps 1–2 below (Sketchfab sourcing, hotspot mesh-name mapping) for the Signal Ghost rebuild. **Steps 3 (gltf-transform optimisation) and the HDRI/font sourcing notes remain valid reference** for the v2-stretch scenario where a hand-modeled GLB prop or a new HDRI is added — see `docs/vision/REQUIREMENTS.md` for the current, testable asset budget. The `gltf-transform` CLI version pinned below (3.2.1) is stale — latest as of this correction is 4.4.1 (verified via `npm view @gltf-transform/cli version`); don't hard-pin a version, use `@latest` and record what you actually used in `docs/ASSET_CREDITS.md`.
 
 ## Scratch-asset staging convention (current)
 
@@ -10,7 +10,7 @@ This replaces the old misspelled `assests/` folder, which was 9 raw/duplicate fi
 
 ## Naming convention for new assets (required)
 
-Every new asset committed to `public/` must be `public/models/<category>/<theme-neutral-name>.glb` (or the matching subtree for non-GLB assets — HDRIs in `public/env/`, textures in `public/textures/`). Both `<category>` and `<theme-neutral-name>` are lowercase `kebab-case`, describe the asset by its *function or generic form*, and must not encode any third-party character, franchise, or lore (`docs/vision/VISION.md` IP Posture). This is the rule the old assets violated in the filename itself — e.g. `kunai_do_minato_namikaze.glb` and `anbu_kakashi_mask.glb` named Naruto characters; the Signal Ghost equivalents are `public/models/drone/scout-drone.glb` or `public/models/hud/hud-core.glb`. Record each new file's source, license, and attribution in `docs/ASSET_CREDITS.md` when it lands (see Milestone 2.5).
+Every new asset committed to `public/` must be `public/models/<category>/<theme-neutral-name>.glb` (or the matching subtree for non-GLB assets — HDRIs in `public/env/`, textures in `public/textures/`). Both `<category>` and `<theme-neutral-name>` are lowercase `kebab-case`, describe the asset by its *function or generic form*, and must not encode any third-party character, franchise, or lore (`docs/vision/VISION.md` IP Posture). This is the rule the removed legacy assets violated in the filename itself — their names encoded specific franchise characters and lore; the Signal Ghost equivalents are `public/models/drone/scout-drone.glb` or `public/models/hud/hud-core.glb`. Record each new file's source, license, and attribution in `docs/ASSET_CREDITS.md` when it lands (see Milestone 2.5).
 
 ---
 
@@ -30,7 +30,7 @@ This is the **highest-risk item in the project.** A browser-delivered 3D model m
 
 ### Search strategy
 1. Go to [sketchfab.com](https://sketchfab.com)
-2. Search: `kakashi hatake` — filter by **Downloadable**, **Free**
+2. Search for your target prop by generic form (e.g. `low-poly visor`, `sci-fi drone`) — filter by **Downloadable**, **Free**
 3. Look for models tagged with `CC Attribution`, `CC Attribution-NonCommercial`, or `Free Download`
 4. Prefer models with:
    - GLB/GLTF listed as available format
@@ -38,9 +38,9 @@ This is the **highest-risk item in the project.** A browser-delivered 3D model m
    - A rigged pose (T-pose or a natural stance)
 
 ### Candidate model checklist before downloading
-- [ ] Licence allows non-commercial fan portfolios (read the model's licence tab)
+- [ ] Licence clears commercial/portfolio use with no mandatory attribution (CC0 / OFL / Apache, or otherwise cleared — read the model's licence tab; **no third-party character IP** per VISION.md IP Posture)
 - [ ] Textures are embedded or downloadable alongside
-- [ ] Visible body parts match the hotspot plan (face, belt area, hand, back)
+- [ ] Form is generic (no franchise/character/lore) and reads clearly at the section's scale
 - [ ] Polygon count is reasonable (< 100k tris)
 
 > **Note:** If no suitable free model exists, consider Sketchfab's "Buy" section for affordable ($5–$20) licensed models, or commission from a freelancer on ArtStation.
@@ -67,18 +67,9 @@ This prints:
 - Texture dimensions and formats
 - Extension usage
 
-Also open in [gltf.report](https://gltf.report) (browser tool) to visually inspect mesh hierarchy and identify which mesh names correspond to which body parts. **Write down the mesh names** — you'll use them in the `KakashiHotspotDirective` to map named meshes to section IDs.
+Also open in [gltf.report](https://gltf.report) (browser tool) to visually inspect the mesh hierarchy and check triangle counts / texture sizes before optimising.
 
-Example mesh name mapping:
-```typescript
-const HOTSPOT_MAP: Record<string, SectionId> = {
-  'Kakashi_Head':       'about',
-  'Kakashi_Book':       'experience',
-  'Kakashi_Belt_Kunai': 'skills',
-  'Kakashi_ANBU_Mask':  'projects',
-  'Kakashi_Headband':   'contact',
-};
-```
+> The archived design mapped named meshes to section IDs for a hover/hotspot interaction. That interaction model was removed (see `docs/archive/LEGACY_ARCHITECTURE.md`); the current app is scroll-driven and does **not** raycast meshes, so no per-mesh hotspot mapping is needed.
 
 ---
 
@@ -106,7 +97,7 @@ npx gltf-transform inspect public/models/<category>/<name>.glb
 > KTX-Software `ktx` CLI, which must be on your PATH (`command -v ktx`). If it isn't installed,
 > the run fails at the `uastc`/`etc1s` step. Either install KTX-Software, or use the documented
 > fallback `--texture-compress webp` (no external binary; still ~95%+ smaller than raw PNG/JPEG
-> textures — a smoke test on `anbu_kakashi_mask.glb` went 2.91 MB → 98 KB via the webp path).
+> textures — a smoke test on a 2.91 MB legacy prop GLB went 2.91 MB → 98 KB via the webp path).
 
 **Target output:**
 - Geometry: Draco-compressed (saves 50–80% on geometry data)
@@ -121,15 +112,15 @@ npx gltf-transform inspect public/models/<category>/<name>.glb
 ## Step 4: Place in Project
 
 ```bash
-# Copy optimised model into Angular assets
-cp kakashi.glb portfolio/public/models/kakashi/kakashi.glb
+# Copy optimised model into Angular assets (theme-neutral <category>/<name>)
+cp model.glb portfolio/public/models/hud/hud-core.glb
 ```
 
 Reference in code via the `public/` path (Angular copies `public/` to build root):
 
 ```typescript
-// In KakashiComponent
-readonly modelUrl = '/models/kakashi/kakashi.glb';
+// In the prop component
+readonly modelUrl = '/models/hud/hud-core.glb';
 ```
 
 Do **not** place in `src/assets/` for large binaries — use `public/` so they're not processed by the Angular build pipeline, just copied.
@@ -143,7 +134,7 @@ GLBs are fetched by Three.js's `GLTFLoader` at runtime, not bundled into JS. The
 In the Angular component, show a loading screen until the model is ready:
 
 ```typescript
-// kakashi.component.ts
+// prop component
 readonly loaded = signal(false);
 
 onModelLoaded() {
@@ -203,7 +194,7 @@ If textures are not PBR (e.g., just a diffuse colour), the model will look flat 
 
 | Asset | Budget |
 |-------|--------|
-| `kakashi.glb` | < 3 MB |
+| Any single `public/models/**/*.glb` | < 3 MB |
 | `night.hdr` | < 512 KB |
 | Total JS bundle (initial) | < 500 KB |
 | Three.js + NGT (lazy chunk) | < 2 MB |
@@ -213,9 +204,9 @@ If textures are not PBR (e.g., just a diffuse colour), the model will look flat 
 
 The **per-GLB budget (3 MB)** is enforced in CI, not just documented: `npm run check:glb-budget`
 (`scripts/check-glb-budget.mjs`) fails the build if any `public/models/**/*.glb` exceeds 3 MB.
-It runs as a step in `.github/workflows/ci.yml`. The orphaned `public/models/kakashi/kakashi.glb`
-(8.35 MB) is temporarily exempted in that script — remove its exception entry the moment the
-file is deleted in Milestone 1.1 so the gate stays honest.
+It runs as a step in `.github/workflows/ci.yml`. As of Milestone 1.1 there are **no exemptions** —
+the last legacy oversized GLB was deleted and the live scene graph is fully procedural (zero GLBs),
+so the script also no-ops gracefully when there is no `public/models` directory at all.
 
 The JS-bundle side is covered separately by `angular.json`'s existing 2 MB/4 MB budgets. Inspect
 bundle composition during development with:

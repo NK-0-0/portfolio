@@ -10,10 +10,9 @@ import { DroneComponent }           from '../drone/drone.component';
  * Scene graph rendered inside NgtCanvas.
  *
  * Three procedural props (zero GLBs) — HUD-core (focal), data-shard (Experience),
- * and one drone reused across Skills + Projects. They replaced the ANBU mask,
- * Icha Icha book, and kunai GLBs like-for-like (same per-section lerp targets);
- * FloatingModelsComponent and the old GLBs are now orphaned pending Milestone 1's
- * asset cleanup.
+ * and one drone reused across Skills + Projects. They preserve the previous
+ * props' per-section lerp targets like-for-like; the earlier GLB-based props and
+ * their assets were removed in Milestone 1.
  *
  * Order matters:
  *  1. SceneController — sets fog + camera parallax first

@@ -1,8 +1,6 @@
 # Architecture — Signal Ghost Portfolio
 
 > Supersedes the archived hover/hotspot design (`docs/archive/LEGACY_ARCHITECTURE.md`), which was never fully built and described a different interaction model under a wrong package name. This document describes what is **actually implemented and running today**. `CLAUDE.md` remains the authoritative day-to-day reference for AI coding assistants and takes precedence if the two ever drift — this file exists for the fuller "why," which `CLAUDE.md` intentionally keeps terse.
->
-> Cleanup pending per `docs/ROADMAP.md` Milestone 0: five orphaned files from the abandoned hover/hotspot design still physically exist in `src/` (`three/kakashi/`, `three/post-processing/`, `core/services/section-store.ts`, `ui/panel/`, `ui/hint/`) but are not part of the live component tree described below.
 
 ## Technology Decisions
 
@@ -47,16 +45,17 @@ src/app/
     services/
       scroll-state.service.ts      # activeSection (0-5) + scrollProgress — single source of truth
       device-capability.ts         # WebGL + mobile detection -> 2D fallback switch
-      model-loading.service.ts     # Tracks GLB load count across mask/floating-models
+      model-loading.service.ts     # GLB load-count gate; live scene is procedural (0 GLBs)
     models/
       section.types.ts             # SectionId, Section, SECTIONS (nav labels)
   three/
     scene/
       scene.component.ts           # Outer shell: fixed canvas + ScrollLayout + loader + footer
-      scene-graph.component.ts     # SceneController -> Lighting -> Mask -> FloatingModels -> Particles
+      scene-graph.component.ts     # SceneController -> Lighting -> HudCore -> DataShard -> Drone -> Particles
       scene-controller.component.ts # Per-section fog color + camera Y lerp
-    mask/                          # Primary 3D focal element, repositions per section
-    floating-models/               # Two floating props (book/kunai equivalents today)
+    hud-core/                      # Primary 3D focal prop (procedural), repositions per section
+    data-shard/                    # Experience floating prop (procedural)
+    drone/                         # Skills + Projects floating prop (procedural)
     environment/
       lighting.component.ts        # Moonlight + rim directional lights, color-lerped per section
       particles.component.ts       # Ambient particle field
@@ -64,12 +63,13 @@ src/app/
     scroll-layout/                 # THE page: Lenis + GSAP ScrollTrigger, all 6 sections
     sections/                      # about/, experience/, skills/, projects/, contact/ content
     fallback/                      # 2D layout for mobile / no-WebGL
-    loader/                        # Loading screen while GLBs fetch
-    footer/                        # Fixed attribution footer
+    loader/                        # Loading screen (dismisses immediately — scene is procedural)
+    footer/                        # Fixed copyright footer
   app.ts                           # Root: @defer-switches between <app-scene> and <app-fallback>
 
 public/
-  models/                          # GLBs the live scene graph actually loads, referenced by relative path
+  env/                             # CC0 night-sky HDRI (staged; wire-up deferred to Milestone 3)
+  # No models/ dir — every live 3D prop is procedural (zero GLBs) as of Milestone 1
 
 docs/
   vision/VISION.md                 # Current visual/content direction
@@ -77,8 +77,6 @@ docs/
   ROADMAP.md                       # Stall diagnosis + milestone/issue plan for the rework
   archive/                         # Superseded docs, kept for history only
 ```
-
-Orphaned (present in `src/` but not in the tree above — pending removal, `docs/ROADMAP.md` issue 0.2): `three/kakashi/kakashi.component.ts`, `three/post-processing/effects.component.ts`, `core/services/section-store.ts`, `ui/panel/panel.component.ts`, `ui/hint/hint.component.ts`.
 
 ## State Management Pattern
 
@@ -136,7 +134,7 @@ User scrolls
   → 2D UI (parallax labels, section hue tween) tweens via the same GSAP ScrollTrigger timeline
 ```
 
-This replaces the archived design's hover-raycast-hotspot → click → open-panel flow entirely. There is no raycasting, no `OutlinePass`/bloom post-processing, and no sliding panel in the live app — scroll position is the only input the 3D scene responds to. This is a deliberate simplification relative to the archived design: it works on touch devices without a separate interaction mode, needs no discoverability affordance ("hover to explore"), and has no dependency on a specific character's mesh topology, which is what let the theme change (Kakashi → Signal Ghost) happen without redesigning the interaction model.
+This replaces the archived design's hover-raycast-hotspot → click → open-panel flow entirely. There is no raycasting, no `OutlinePass`/bloom post-processing, and no sliding panel in the live app — scroll position is the only input the 3D scene responds to. This is a deliberate simplification relative to the archived design: it works on touch devices without a separate interaction mode, needs no discoverability affordance ("hover to explore"), and has no dependency on a specific character's mesh topology, which is what let the theme change to the Signal Ghost identity happen without redesigning the interaction model.
 
 ## Mobile / No-WebGL Fallback Strategy
 

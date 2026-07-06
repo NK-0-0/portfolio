@@ -13,7 +13,7 @@ const PARTICLE_COUNT = 120;
 
 /**
  * Floating dust-mote / leaf particles that drift across the scene.
- * Particles are scattered in a volume around Kakashi and animate
+ * Particles are scattered in a volume around the focal prop and animate
  * with a slow upward drift + sinusoidal sway each frame.
  */
 @Component({

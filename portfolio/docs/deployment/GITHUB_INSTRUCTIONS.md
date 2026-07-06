@@ -28,7 +28,7 @@ portfolio/                        ← repo root
 | Branch | Purpose | Protection |
 |--------|---------|-----------|
 | `main` | Production — always deployable | Force-push disabled, deletion blocked |
-| `feat/<name>` | New features (e.g., `feat/kakashi-model`) | None |
+| `feat/<name>` | New features (e.g., `feat/hud-core-prop`) | None |
 | `fix/<name>` | Bug fixes | None |
 | `chore/<name>` | Tooling, deps, CI changes | None |
 
@@ -71,8 +71,8 @@ Follow **Conventional Commits** (https://conventionalcommits.org):
 
 **Examples:**
 ```
-feat(kakashi): add raycasting hotspot directive
-fix(panel): prevent flicker on quick hover-out
+feat(hud-core): add procedural focal prop
+fix(drone): prevent flicker on section change
 perf(scene): lazy-load Three.js chunk on first user interaction
 chore(deps): upgrade angular-three to v4.1.0
 docs(vision): update section mapping table
@@ -387,11 +387,11 @@ Add secrets at: **Settings → Secrets and variables → Actions → New reposit
 When the portfolio reaches a milestone worth marking:
 
 ```bash
-git tag -a v1.0.0 -m "Initial launch — Kakashi scene complete"
+git tag -a v1.0.0 -m "Initial launch — 3D scene complete"
 git push origin v1.0.0
 ```
 
-Then use the GitHub Releases page to attach the optimised `kakashi.glb` as a release asset (keeps large binaries out of the main git history).
+Then use the GitHub Releases page to attach any optimised `.glb` as a release asset (keeps large binaries out of the main git history). Note: the live scene is currently fully procedural and ships no GLBs.
 
 ---
 

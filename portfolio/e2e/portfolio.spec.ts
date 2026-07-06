@@ -27,7 +27,7 @@ async function waitForApp(page: Page): Promise<'3d' | 'fallback'> {
 
 // ─── smoke tests ──────────────────────────────────────────────────────────────
 
-test.describe('Kakashi Portfolio — live site smoke tests', () => {
+test.describe('Portfolio — live site smoke tests', () => {
 
   test('page loads without JS errors and renders something visible', async ({ page }) => {
     const errors = collectErrors(page);
@@ -51,8 +51,8 @@ test.describe('Kakashi Portfolio — live site smoke tests', () => {
 
     const footer = page.locator('app-footer footer');
     await expect(footer).toBeVisible({ timeout: 10_000 });
-    await expect(footer).toContainText('Masashi Kishimoto');
-    await expect(footer).toContainText('Studio Pierrot');
+    await expect(footer).toContainText('All rights reserved');
+    await expect(footer).toContainText(String(new Date().getFullYear()));
   });
 
   test('hero section is visible on load', async ({ page }) => {

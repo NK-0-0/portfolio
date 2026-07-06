@@ -11,8 +11,8 @@ interface Project {
 /** Dummy data — replace with your real projects. */
 const PROJECTS: Project[] = [
   {
-    title: 'Kakashi 3D Portfolio',
-    description: 'This very site. Angular 21 + Three.js interactive 3D portfolio with hotspot navigation.',
+    title: 'Interactive 3D Portfolio',
+    description: 'This very site. Angular 21 + Three.js scroll-driven 3D portfolio with a fixed WebGL scene that reacts to scroll position.',
     stack: ['Angular 21', 'Three.js', 'angular-three', 'SCSS'],
     githubUrl: 'https://github.com/your-handle/portfolio',
   },

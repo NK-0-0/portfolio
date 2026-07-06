@@ -229,10 +229,10 @@ git commit -m "chore: track binary assets with Git LFS"
 
 ### Alternative: Store model in GitHub Releases
 
-Upload `kakashi.glb` as a release asset (no LFS needed) and reference it by its raw GitHub release URL in your Angular code. This keeps the repo lean.
+Upload a large `.glb` as a release asset (no LFS needed) and reference it by its raw GitHub release URL in your Angular code. This keeps the repo lean. (Not currently needed — the live scene ships zero GLBs.)
 
 ```typescript
-readonly modelUrl = 'https://github.com/<user>/portfolio/releases/download/v1.0/kakashi.glb';
+readonly modelUrl = 'https://github.com/<user>/portfolio/releases/download/v1.0/model.glb';
 ```
 
 ---
@@ -270,4 +270,4 @@ npx http-server dist/portfolio/browser -p 4200 --proxy http://localhost:4200?
 - [ ] Large assets (GLB, HDR) handled via LFS or release assets
 - [ ] Production build tested locally before push
 - [ ] `--base-href` matches actual repo name (or `/` for custom domain)
-- [ ] Footer attribution is correct for whatever is actually shipping — currently still the Kakashi/Kishimoto notice (verified against `src/app/ui/footer/footer.component.ts`, 2026-07-05); once `docs/ROADMAP.md` Milestone 1 lands, this becomes either no notice (if no third-party assets are used) or an `docs/ASSET_CREDITS.md`-sourced notice — update this checklist item then
+- [ ] Footer copy is correct for whatever is actually shipping — as of Milestone 1 the footer is a plain copyright line (no third-party attribution, since all live 3D props are original procedural geometry; see `docs/ASSET_CREDITS.md`). If a mandatory-attribution asset is ever added, restore an `docs/ASSET_CREDITS.md`-sourced notice and update this item

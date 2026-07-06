@@ -10,7 +10,7 @@ say versus what is courtesy-only.
 - **Status legend:** `live` = referenced by the app today · `landed` = committed but not yet wired in ·
   `pending removal` = still present but slated for deletion in a named milestone.
 
-Last updated: 2026-07-06 · Milestone 2.5.
+Last updated: 2026-07-06 · Milestone 1.1–1.3 (fan-IP asset removal).
 
 ---
 
@@ -20,20 +20,21 @@ Last updated: 2026-07-06 · Milestone 2.5.
 |---|---|---|---|---|---|---|
 | Night-sky HDRI (environment map / IBL) | `public/env/night-sky.hdr` | Poly Haven — "Qwantani Night (Pure Sky)" <https://polyhaven.com/a/qwantani_night_puresky> | **CC0** (public domain) | **No** (CC0) | Not yet — env map for Signal Ghost lighting; **wire-up deferred to Milestone 3** (see note below) | landed |
 | HUD-core focal prop | — (procedural, no GLB) | Original procedural Three.js geometry (Milestone 2.2) | n/a (original) | No | Focal 3D prop, all sections | live |
-| Data-shard / drone floating props | — (procedural, no GLB) | Original procedural Three.js geometry (Milestone 2.3, in progress on `milestone-2-floating-props`) | n/a (original) | No | Experience / Skills / Projects | in progress (sibling task) |
+| Data-shard / drone floating props | — (procedural, no GLB) | Original procedural Three.js geometry (Milestone 2.3) | n/a (original) | No | Experience / Skills / Projects | live |
 
-### Pending removal — Kakashi-era GLBs (Milestone 1.1)
+### Removed — legacy fan-IP GLBs (Milestone 1.1) — historical record
 
-These are still on disk and still IP-encumbered; they are **not** part of the live Signal Ghost scene
-graph (the focal prop is now procedural). Recorded here so the ledger matches reality until Milestone 1.1
-deletes them.
+These GLBs were the original third-party fan-IP props. They were **deleted from `public/` in
+Milestone 1.1** (along with their orphaned component source and the `check-glb-budget.mjs` exemption);
+the live scene graph never referenced them by then (the focal + floating props are now procedural). Rows
+are retained as a provenance/history trail — the files are no longer on disk.
 
-| Asset | File | Source | License | Attribution required | Where used | Status |
+| Asset | File (deleted) | Source | License | Attribution required | Where used | Status |
 |---|---|---|---|---|---|---|
-| ANBU mask GLB | `public/models/mask/anbu_kakashi_mask.glb` | Kakashi Hatake fan-model (Sketchfab-era) | Fan-art / **third-party character IP** (© Masashi Kishimoto / Studio Pierrot) | Yes (fan-use notice) | Orphaned — replaced by procedural HUD-core | pending removal (M1.1) |
-| Icha Icha book GLB | `public/models/book/icha_icha.glb` | Kakashi Hatake fan-model | Fan-art / third-party character IP | Yes | Orphaned — replaced by procedural data-shard | pending removal (M1.1) |
-| Kunai GLB | `public/models/kunai/kunai_do_minato_namikaze.glb` | Kakashi Hatake fan-model | Fan-art / third-party character IP | Yes | Orphaned — replaced by procedural drone | pending removal (M1.1) |
-| Full-body Kakashi GLB | `public/models/kakashi/kakashi.glb` | Kakashi Hatake fan-model | Fan-art / third-party character IP | Yes | Unused by live scene graph (budget-exempted in `scripts/check-glb-budget.mjs`) | pending removal (M1.1) |
+| ANBU mask GLB | `public/models/mask/anbu_kakashi_mask.glb` | Kakashi Hatake fan-model (Sketchfab-era) | Fan-art / **third-party character IP** (© Masashi Kishimoto / Studio Pierrot) | Yes (fan-use notice) | Replaced by procedural HUD-core | removed (M1.1) — historical record |
+| Icha Icha book GLB | `public/models/book/icha_icha.glb` | Kakashi Hatake fan-model | Fan-art / third-party character IP | Yes | Replaced by procedural data-shard | removed (M1.1) — historical record |
+| Kunai GLB | `public/models/kunai/kunai_do_minato_namikaze.glb` | Kakashi Hatake fan-model | Fan-art / third-party character IP | Yes | Replaced by procedural drone | removed (M1.1) — historical record |
+| Full-body Kakashi GLB | `public/models/kakashi/kakashi.glb` | Kakashi Hatake fan-model | Fan-art / third-party character IP | Yes | Unused by live scene graph (was budget-exempted in `scripts/check-glb-budget.mjs`) | removed (M1.1) — historical record |
 
 ---
 
@@ -51,7 +52,7 @@ No fonts are self-hosted — all are loaded from the Google Fonts CDN, so there 
 | Inter | Body / UI copy | Google Fonts CDN | SIL OFL 1.1 | No | not yet wired (Milestone 1 typography swap) |
 | JetBrains Mono | Mono / code / tag labels | Google Fonts CDN | SIL OFL 1.1 (font) / Apache-2.0 (source) | No | **live** — kept across the rebrand |
 
-### Pending removal — Kakashi-era JP stack (Milestone 1 typography swap)
+### Pending removal — legacy JP font stack (Milestone 1 typography swap)
 
 Still referenced live in `src/index.html` and `src/styles.scss` (`--font-display`/`--font-heading`/
 `--font-ui`) as of 2026-07-06. All OFL — no license risk — but theme-mismatched and slated for the token

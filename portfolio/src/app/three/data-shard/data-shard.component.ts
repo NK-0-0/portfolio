@@ -16,7 +16,7 @@ import { ScrollStateService } from '../../core/services/scroll-state.service';
 /**
  * Data-shard — the Experience-section floating prop (procedural, no GLB).
  *
- * Replaces the Icha Icha book GLB. A matte gunmetal `RoundedBoxGeometry` tablet
+ * The Experience-section floating prop. A matte gunmetal `RoundedBoxGeometry` tablet
  * with a thin emissive "screen" plane on its front face carrying a fake data
  * readout drawn to a `CanvasTexture` (Signal Ghost "mission log" direction).
  *
@@ -80,7 +80,7 @@ export class DataShardComponent {
         this.#readout.offset.y = (this.#readout.offset.y + delta * 0.14) % 1;
       }
 
-      // Reused verbatim from floating-models book target block.
+      // Visible only in the Experience section (index 2).
       const targetOpacity = section === 2 ? 1.0 : 0.0;
       this.#opacity += (targetOpacity - this.#opacity) * Math.min(delta * 2.5, 1);
 

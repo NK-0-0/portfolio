@@ -20,7 +20,7 @@ If you are using a tool that reads `AGENTS.md` from the project root, symlink or
 ## What an AI assistant should know before touching this project
 
 ### The one-line summary
-Angular 21 static SPA. Lenis + GSAP ScrollTrigger drive one continuous scrollable page through six sections; a fixed WebGL canvas behind it lerps a 3D focal prop, two floating props, lighting/fog, and camera position to per-section target values as `ScrollStateService.activeSection` changes. There is no click-to-open-panel navigation and no hover/raycast interaction — scroll position is the only input the 3D scene responds to. Deploys to GitHub Pages. Currently mid-rebrand from a Kakashi/Naruto fan-art theme to an original "Signal Ghost" sci-fi identity — see `docs/vision/VISION.md` and `docs/vision/REQUIREMENTS.md`.
+Angular 21 static SPA. Lenis + GSAP ScrollTrigger drive one continuous scrollable page through six sections; a fixed WebGL canvas behind it lerps a 3D focal prop, two floating props, lighting/fog, and camera position to per-section target values as `ScrollStateService.activeSection` changes. There is no click-to-open-panel navigation and no hover/raycast interaction — scroll position is the only input the 3D scene responds to. Deploys to GitHub Pages. Mid-rebrand to an original "Signal Ghost" sci-fi identity (the earlier third-party fan-art assets were removed in `docs/ROADMAP.md` Milestone 1) — see `docs/vision/VISION.md` and `docs/vision/REQUIREMENTS.md`.
 
 ### Non-obvious constraints (read these before writing any code)
 

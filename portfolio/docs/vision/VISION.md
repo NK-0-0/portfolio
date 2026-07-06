@@ -1,6 +1,6 @@
 # Project Vision — Signal Ghost (Original Sci-Fi Portfolio)
 
-> Supersedes the archived Kakashi/Naruto fan-art concept (`docs/archive/LEGACY_VISION.md`). See `docs/ROADMAP.md` for why that concept was dropped and how the rework is sequenced. This document is the visual/content brief; `docs/architecture/ARCHITECTURE.md` and `CLAUDE.md` cover the technical implementation, which is **unchanged** by this rebrand — only the theme and assets change. **See `docs/vision/REQUIREMENTS.md`** for this brief turned into testable functional/non-functional acceptance criteria, web-verified feasibility notes, and open design-review flags (added 2026-07-05) — that document is the one `angular-dev`/`qa-engineer` should work from for "is this actually done."
+> Supersedes the archived fan-art concept (`docs/archive/LEGACY_VISION.md`). See `docs/ROADMAP.md` for why that concept was dropped and how the rework is sequenced. This document is the visual/content brief; `docs/architecture/ARCHITECTURE.md` and `CLAUDE.md` cover the technical implementation, which is **unchanged** by this rebrand — only the theme and assets change. **See `docs/vision/REQUIREMENTS.md`** for this brief turned into testable functional/non-functional acceptance criteria, web-verified feasibility notes, and open design-review flags (added 2026-07-05) — that document is the one `angular-dev`/`qa-engineer` should work from for "is this actually done."
 
 ## Concept & Mood
 
@@ -84,11 +84,11 @@ Per-section state lives in module-level arrays (`FOG_COLORS`/`CAMERA_Y` in `scen
 
 ## Original 3D Prop Concepts
 
-| Old prop | New prop | Build method | Cost |
+| Old prop (removed, M1.1) | New prop | Build method | Cost |
 |---|---|---|---|
-| ANBU mask (2.8MB GLB) | HUD-core / visor shard | Hand-modeled low-poly GLB — curved lens/visor fragment, ≤3k tris, vertex color or one 512px emissive map | Low-medium |
-| Icha Icha book (2.5MB GLB) | Data shard / log tablet | **Fully procedural** — `RoundedBoxGeometry`/beveled `BoxGeometry` + a `CanvasTexture` showing a fake scrolling readout | Lowest — zero GLB, zero license risk |
-| Kunai (1.6MB GLB) | Drone / signal module | Procedural composition — `IcosahedronGeometry` core + thin `BoxGeometry` struts, assembled directly in the angular-three template | Low — no asset pipeline, instant iteration |
+| Legacy focal GLB (2.8MB) | HUD-core / visor shard | Hand-modeled low-poly GLB — curved lens/visor fragment, ≤3k tris, vertex color or one 512px emissive map | Low-medium |
+| Legacy tablet GLB (2.5MB) | Data shard / log tablet | **Fully procedural** — `RoundedBoxGeometry`/beveled `BoxGeometry` + a `CanvasTexture` showing a fake scrolling readout | Lowest — zero GLB, zero license risk |
+| Legacy floating GLB (1.6MB) | Drone / signal module | Procedural composition — `IcosahedronGeometry` core + thin `BoxGeometry` struts, assembled directly in the angular-three template | Low — no asset pipeline, instant iteration |
 
 **Recommendation: ship all three as procedural primitives for v1, not custom GLBs.** Ad-hoc asset sourcing was one of the diagnosed failure modes (`docs/ROADMAP.md` Finding 5–6); committing to hand-modeling three new props before relaunch reintroduces that exact risk. Procedural props also let `ModelLoadingService.TOTAL_ASSETS` potentially drop to 0 GLBs, removing a whole class of loading-screen/timeout bugs. Hand-modeled GLB upgrades are a v2 stretch goal, not a v1 requirement.
 
@@ -110,7 +110,7 @@ Per-section state lives in module-level arrays (`FOG_COLORS`/`CAMERA_Y` in `scen
 - **Don't resurrect hover/raycast hotspots or bloom/post-processing.** These are the orphaned designs from the previous build (`docs/ROADMAP.md` Finding 2–3) — they were abandoned mid-build, not merely unfinished. `UnrealBloomPass` in particular is a common mobile-perf killer; this project already tried it once and it didn't survive contact with reality.
 - **Don't let per-section hue swings make it feel like six different apps.** A recruiter scrolling in 20 seconds should read one coherent identity. Keep hue deltas between adjacent sections modest.
 - **Don't extend scroll-pinning past the hero.** Pinning every section punishes the "skim in 30 seconds" recruiter use case — the single most common self-inflicted wound in scroll-driven portfolios.
-- **Don't commission more than 2–3 unique props.** The current architecture already reuses the kunai-equivalent prop across both Skills and Projects — keep that discipline.
+- **Don't commission more than 2–3 unique props.** The current architecture already reuses the drone prop across both Skills and Projects — keep that discipline.
 - **Don't go full-surface emissive.** Emissive lives on thin accent lines only (see Materials & Lighting).
 - **Don't make invented glyphs load-bearing.** If adding an invented HUD-glyph decoration system, keep it decorative only — the real section label stays the legible wayfinding text.
 - **Don't source "sci-fi HUD" asset packs from marketplaces as a shortcut without checking the license.** That's how the project ended up with mandatory-attribution fan-art assets in the first place. If any external asset is used, it must be CC0/public-domain-clear with the license recorded in `docs/ASSET_CREDITS.md` (see `docs/ROADMAP.md` Milestone 2, issue 2.5) — the procedural-first approach above avoids needing this for v1 entirely.

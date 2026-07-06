@@ -6,15 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Project Is
 
-An Angular 21 static, scroll-driven 3D portfolio deployed to GitHub Pages. Lenis (smooth scroll) + GSAP ScrollTrigger drive a single continuous page (`ScrollLayoutComponent`) through six sections (hero, about, experience, skills, projects, contact). A fixed WebGL canvas sits behind the scrollable content; as the user scrolls, `ScrollStateService.activeSection` updates and every 3D component (mask position/scale/opacity, floating book/kunai props, moonlight/rim light color, fog color, camera Y, fixed background hue) lerps to new per-section target values read from that one signal. On mobile or when WebGL is unavailable, `DeviceCapabilityService` switches the root to a 2D `FallbackComponent` instead.
+An Angular 21 static, scroll-driven 3D portfolio deployed to GitHub Pages. Lenis (smooth scroll) + GSAP ScrollTrigger drive a single continuous page (`ScrollLayoutComponent`) through six sections (hero, about, experience, skills, projects, contact). A fixed WebGL canvas sits behind the scrollable content; as the user scrolls, `ScrollStateService.activeSection` updates and every 3D component (the HUD-core focal prop's position/scale/opacity, the data-shard and drone floating props, moonlight/rim light color, fog color, camera Y, fixed background hue) lerps to new per-section target values read from that one signal. On mobile or when WebGL is unavailable, `DeviceCapabilityService` switches the root to a 2D `FallbackComponent` instead.
 
-**Docs status (updated 2026-07-05):** `docs/vision/VISION.md` and `docs/architecture/ARCHITECTURE.md` have been rewritten to match the current scroll-driven architecture described below, and now also describe the planned rebrand away from the Kakashi/Naruto fan-IP theme toward an original "Signal Ghost" sci-fi identity (see `docs/vision/VISION.md`, and `docs/vision/REQUIREMENTS.md` for that brief turned into testable FR/NFR acceptance criteria). The old hover/hotspot/`SectionStore` design they used to describe is archived at `docs/archive/LEGACY_VISION.md` / `LEGACY_ARCHITECTURE.md` for historical record — do not implement anything from those. `docs/development/AGENTS.md`, `docs/architecture/SKILLS_REFERENCE.md`, `docs/development/ASSET_PIPELINE.md`, and `docs/development/DEVELOPMENT.md` have now all been corrected for the staleness `docs/ROADMAP.md` Milestone 0 flagged (and some it didn't — see `docs/vision/REQUIREMENTS.md`'s feasibility log). `docs/ROADMAP.md` holds the full stall diagnosis plus the milestone/issue plan for the rework; read it for "why" and "what's next." This file remains the terse day-to-day source of truth and takes precedence if anything ever drifts again.
+**Docs status (updated 2026-07-05):** `docs/vision/VISION.md` and `docs/architecture/ARCHITECTURE.md` have been rewritten to match the current scroll-driven architecture described below, and now also describe the rebrand toward an original "Signal Ghost" sci-fi identity (see `docs/vision/VISION.md`, and `docs/vision/REQUIREMENTS.md` for that brief turned into testable FR/NFR acceptance criteria). The old hover/hotspot/`SectionStore` design they used to describe is archived at `docs/archive/LEGACY_VISION.md` / `LEGACY_ARCHITECTURE.md` for historical record — do not implement anything from those. `docs/development/AGENTS.md`, `docs/architecture/SKILLS_REFERENCE.md`, `docs/development/ASSET_PIPELINE.md`, and `docs/development/DEVELOPMENT.md` have now all been corrected for the staleness `docs/ROADMAP.md` Milestone 0 flagged (and some it didn't — see `docs/vision/REQUIREMENTS.md`'s feasibility log). `docs/ROADMAP.md` holds the full stall diagnosis plus the milestone/issue plan for the rework; read it for "why" and "what's next." This file remains the terse day-to-day source of truth and takes precedence if anything ever drifts again.
 
-**Rebrand in flight — the theme is changing, the architecture is not.** The live scene graph and asset filenames described below (Kakashi mask, Icha Icha book, kunai) are still what's actually running today; they are being replaced per `docs/vision/VISION.md` and `docs/ROADMAP.md` Milestones 1–3 with original, non-IP assets and a new palette/typography. Don't be surprised if this section reads as already-outdated soon — check `docs/ROADMAP.md` for current milestone status before assuming which asset set is live.
+**Rebrand — the theme changed, the architecture did not.** The original third-party fan-IP GLB props were removed in `docs/ROADMAP.md` Milestone 1 (see `docs/ASSET_CREDITS.md` for the removed-asset ledger) and replaced by three original **procedural** props (HUD-core, data-shard, drone — zero GLBs) per `docs/vision/VISION.md`'s "Signal Ghost" identity. Palette/typography rework continues in Milestones 1–3; check `docs/ROADMAP.md` for current milestone status. `docs/ASSET_CREDITS.md` is the authoritative provenance ledger for every shipped asset.
 
-As a result of that pivot, the old hover/hotspot-era files were **deleted** from `src/` in Milestone 0.2 — the original `three/kakashi/` model, `three/post-processing/` (OutlinePass/Bloom), `core/services/section-store.ts` (`SectionStore`), `ui/panel/` (sliding panel), and `ui/hint/` ("Hover Kakashi to explore"). They are gone, not merely orphaned; do not reintroduce them.
+The old hover/hotspot-era files were also **deleted** from `src/` in Milestone 0.2 — the original focal-model component, `three/post-processing/` (OutlinePass/Bloom), `core/services/section-store.ts` (`SectionStore`), `ui/panel/` (sliding panel), and `ui/hint/` (the "hover to explore" hint). They are gone, not merely orphaned; do not reintroduce them.
 
-The live 3D scene graph (`scene-graph.component.ts`) is: `SceneController` (fog + camera) → `Lighting` → `Mask` → `FloatingModels` (book + kunai) → `Particles`. The live content layer is `ScrollLayoutComponent`, which renders the six `<section>`s directly (not through `PanelComponent`).
+The live 3D scene graph (`scene-graph.component.ts`) is: `SceneController` (fog + camera) → `Lighting` → `HudCore` (focal prop) → `DataShard` (Experience prop) → `Drone` (Skills + Projects prop) → `Particles`. All three props are procedural — the scene loads zero GLBs. The live content layer is `ScrollLayoutComponent`, which renders the six `<section>`s directly (not through `PanelComponent`).
 
 ---
 
@@ -63,7 +63,7 @@ src/app/
       scroll-state.service.ts      # ActiveSection (0-5) + scrollProgress — the single
                                     # source of truth every 3D component reads
       device-capability.ts         # WebGL + mobile detection -> 2D fallback switch
-      model-loading.service.ts     # Tracks GLB load count across mask/floating-models
+      model-loading.service.ts     # GLB load-count gate; live scene is procedural (0 GLBs)
     models/
       section.types.ts             # SectionId, Section, SECTIONS (used for nav labels)
   three/
@@ -71,8 +71,9 @@ src/app/
       scene.component.ts           # Outer shell: fixed canvas + ScrollLayout + loader + footer
       scene-graph.component.ts     # What's rendered inside NgtCanvas, and in what order
       scene-controller.component.ts # Per-section fog color + camera Y lerp
-    mask/                          # ANBU mask — primary 3D focal element, repositions per section
-    floating-models/               # Icha Icha book (Experience) + kunai (Skills/Projects)
+    hud-core/                      # HUD-core — primary 3D focal prop (procedural), repositions per section
+    data-shard/                    # Data-shard floating prop (procedural) — Experience
+    drone/                         # Drone floating prop (procedural) — Skills + Projects
     environment/
       lighting.component.ts        # Moonlight + rim directional lights, color-lerped per section
       particles.component.ts       # Ambient dust
@@ -82,15 +83,12 @@ src/app/
     sections/                     # about/, experience/, skills/, projects/, contact/ content
     fallback/                      # 2D layout for mobile / no-WebGL
     loader/                        # Loading screen while GLBs fetch
-    footer/                        # Fixed attribution footer (Kakashi IP notice)
+    footer/                        # Fixed copyright footer (no third-party attribution)
   app.ts                           # Root: @defer-switches between <app-scene> and <app-fallback>
 
 public/
-  models/
-    kakashi/kakashi.glb            # unused by the live scene graph; slated for removal in Milestone 1.1
-    mask/anbu_kakashi_mask.glb
-    book/icha_icha.glb
-    kunai/kunai_do_minato_namikaze.glb
+  env/night-sky.hdr                # CC0 HDRI (staged; wire-up deferred to Milestone 3)
+  # No models/ dir — every live 3D prop is procedural (zero GLBs) as of Milestone 1
 
 docs/                              # corrected 2026-07-05 (see opening paragraph + docs/README.md)
 ```
@@ -134,10 +132,10 @@ Key imports used in this codebase: `NgtCanvas` (from `angular-three/dom`), `NgtA
 **Deprecation note (verified against the installed `angular-three@4.2.2` type definitions, 2026-07-05):** `injectLoader` and `injectBeforeRender` are marked `@deprecated` in this version — superseded by `loaderResource()` and `beforeRender()`, scheduled for removal in v5. They still work today; `injectStore` is unaffected. Don't add *new* components against the deprecated names — see `docs/vision/REQUIREMENTS.md` NFR-8 and `docs/ROADMAP.md` Milestone 3, issue 3.5 (migrating the existing ones is scheduled there, not urgent).
 
 ### Per-frame animation pattern
-Every animated 3D component follows the same shape: load the GLB with `injectLoader(() => GLTFLoader, () => 'models/.../file.glb')`, keep interpolated transform values as plain (non-signal) instance fields, and mutate the `Object3D` directly inside a single `injectBeforeRender(({ delta }) => { ... })` callback using `current += (target - current) * Math.min(delta * k, 1)` lerps keyed off `ScrollStateService.activeSection()`. See `mask.component.ts` and `floating-models.component.ts` for the canonical example before adding a new animated prop.
+Every animated 3D component follows the same shape: build its geometry (procedurally today, or load a GLB with `injectLoader(() => GLTFLoader, () => 'models/.../file.glb')` if one is reintroduced), keep interpolated transform values as plain (non-signal) instance fields, and mutate the `Object3D` directly inside a single `injectBeforeRender(({ delta }) => { ... })` callback using `current += (target - current) * Math.min(delta * k, 1)` lerps keyed off `ScrollStateService.activeSection()`. See `hud-core.component.ts`, `data-shard.component.ts`, and `drone.component.ts` for the canonical example before adding a new animated prop.
 
 ### Model loading gate
-`ModelLoadingService` counts a hardcoded `TOTAL_ASSETS` (currently 3: mask + book + kunai) and has a 20s timeout fallback. If you add or remove a loaded GLB from the live scene graph, update `TOTAL_ASSETS` in `model-loading.service.ts` or the loader will hang or dismiss early.
+`ModelLoadingService` counts a hardcoded `TOTAL_ASSETS` (currently `0` — every live prop is procedural, so the loader dismisses immediately) and has a 20s timeout fallback. If you add or remove a loaded GLB from the live scene graph, update `TOTAL_ASSETS` in `model-loading.service.ts` or the loader will hang or dismiss early.
 
 ---
 
@@ -156,7 +154,7 @@ WebGL is mocked via `vitest-canvas-mock`, imported once in `src/test-setup.ts`. 
 Don't test NGT rendering output — test the *behaviour* (e.g. that a service signal updates correctly). Not every component has a spec file today (e.g. `experience`, `skills`, `projects` sections don't) — follow the pattern of the sibling components that do (`about`, `contact`) if adding coverage.
 
 ### E2E (Playwright)
-`e2e/portfolio.spec.ts` runs against the **deployed production site** (`baseURL` in `playwright.config.ts` is `https://nk-0-0.github.io`), asserting on `/portfolio/`. These are post-deploy smoke checks (page loads with no console errors, footer attribution present, hero visible) — not a local development tool.
+`e2e/portfolio.spec.ts` runs against the **deployed production site** (`baseURL` in `playwright.config.ts` is `https://nk-0-0.github.io`), asserting on `/portfolio/`. These are post-deploy smoke checks (page loads with no console errors, footer copyright present, hero visible) — not a local development tool.
 
 ---
 
@@ -165,7 +163,7 @@ Don't test NGT rendering output — test the *behaviour* (e.g. that a service si
 - Do not re-enable SSR. The project is static-only for GitHub Pages. `outputMode: "static"` in `angular.json` is intentional. The old SSR/Node scaffolding (`@angular/ssr`, `@angular/platform-server`, `express`, `@types/express`, the `serve:ssr:portfolio` script) was removed in Milestone 0.6 — do not add it back. Note `@angular/router` is still a dependency: `angular-three` statically imports it (for `NgtRoutedScene`), so the build won't resolve without it even though this app defines no routes.
 - Do not place large binaries (GLB, HDR) in `src/assets/` — use `public/` so they bypass the Angular build pipeline.
 - Do not exceed the raised bundle budget in `angular.json` (2MB warning / 4MB error). Three.js is lazy-loaded via `@defer` in `app.ts` — keep it that way.
-- Do not re-create the deleted hover/hotspot files (`kakashi.component.ts`, `panel.component.ts`, `effects.component.ts`, `section-store.ts`, `hint.component.ts`) — they were removed in Milestone 0.2 and nothing in the live app depends on them.
+- Do not re-create the deleted hover/hotspot files (the old focal-model component, `panel.component.ts`, `effects.component.ts`, `section-store.ts`, `hint.component.ts`) — they were removed in Milestone 0.2 and nothing in the live app depends on them.
 - Do not add OrbitControls or Leva debug controls to production code paths.
 
 ---
@@ -181,6 +179,6 @@ Live at `https://nk-0-0.github.io/portfolio/`. `lighthouserc.json` runs Lighthou
 
 ---
 
-## IP Notice
+## Asset Provenance
 
-The ANBU mask, Icha Icha book, and kunai models are Kakashi Hatake assets © Masashi Kishimoto / Studio Pierrot. This is fan work for a non-commercial portfolio. The footer must include attribution (verified by the Playwright suite). Do not add monetisation, paywalls, or commercial branding.
+The third-party fan-IP GLB props that once shipped here were removed in `docs/ROADMAP.md` Milestone 1. Every live 3D prop is now original procedural geometry (zero GLBs), so the site carries **no mandatory-attribution third-party asset** and the footer is a plain copyright line. `docs/ASSET_CREDITS.md` is the single source of truth for the license and attribution status of every asset the project ships or stages — keep new assets CC0 / SIL OFL / Apache-2.0 (no third-party character IP) per that ledger and `docs/vision/VISION.md`'s IP Posture.
