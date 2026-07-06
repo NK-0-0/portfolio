@@ -3,22 +3,25 @@ import { LightingComponent }        from '../environment/lighting.component';
 import { ParticlesComponent }       from '../environment/particles.component';
 import { HudCoreComponent }         from '../hud-core/hud-core.component';
 import { SceneControllerComponent } from './scene-controller.component';
-import { FloatingModelsComponent }  from '../floating-models/floating-models.component';
+import { DataShardComponent }       from '../data-shard/data-shard.component';
+import { DroneComponent }           from '../drone/drone.component';
 
 /**
  * Scene graph rendered inside NgtCanvas.
  *
- * HUD-core (procedural) is the primary 3D focal element, transitioning from a
- * large hero centrepiece to a per-section decoration. It replaced the ANBU mask
- * like-for-like (same per-section lerp targets), which is now orphaned pending
- * Milestone 1's asset cleanup.
+ * Three procedural props (zero GLBs) — HUD-core (focal), data-shard (Experience),
+ * and one drone reused across Skills + Projects. They replaced the ANBU mask,
+ * Icha Icha book, and kunai GLBs like-for-like (same per-section lerp targets);
+ * FloatingModelsComponent and the old GLBs are now orphaned pending Milestone 1's
+ * asset cleanup.
  *
  * Order matters:
  *  1. SceneController — sets fog + camera parallax first
  *  2. Lighting        — reactive per-section colour
  *  3. HudCore         — hero focal point / About decoration
- *  4. FloatingModels  — book (Experience) + kunai (Skills)
- *  5. Particles       — ambient dust rendered last
+ *  4. DataShard       — Experience prop
+ *  5. Drone           — Skills + Projects prop (reused)
+ *  6. Particles       — ambient dust rendered last
  */
 @Component({
   selector: 'app-scene-graph',
@@ -27,14 +30,16 @@ import { FloatingModelsComponent }  from '../floating-models/floating-models.com
     SceneControllerComponent,
     LightingComponent,
     HudCoreComponent,
-    FloatingModelsComponent,
+    DataShardComponent,
+    DroneComponent,
     ParticlesComponent,
   ],
   template: `
     <app-scene-controller />
     <app-lighting />
     <app-hud-core />
-    <app-floating-models />
+    <app-data-shard />
+    <app-drone />
     <app-particles />
   `,
 })
