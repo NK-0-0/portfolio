@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "e2e:local": "playwright test --config=playwright.config.local.ts",
+    "perf:fps": "ng build --configuration production && node scripts/measure-fps.mjs",
     "lint": "ng lint",
     "optimize:models": "gltf-transform optimize --compress draco --texture-compress ktx2 --texture-size 1024",
     "check:glb-budget": "node scripts/check-glb-budget.mjs"
