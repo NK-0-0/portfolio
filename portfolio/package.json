@@ -7,6 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "e2e:local": "playwright test --config=playwright.config.local.ts",
     "lint": "ng lint",
     "optimize:models": "gltf-transform optimize --compress draco --texture-compress ktx2 --texture-size 1024",
     "check:glb-budget": "node scripts/check-glb-budget.mjs"
@@ -41,6 +42,7 @@
     "angular-eslint": "21.4.0",
     "angular-three-plugin": "^4.2.2",
     "eslint": "^10.3.0",
+    "http-server": "^14.1.1",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
