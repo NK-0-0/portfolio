@@ -1,6 +1,6 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { injectBeforeRender, injectStore } from 'angular-three';
+import { beforeRender, injectStore } from 'angular-three';
 import { Color, DirectionalLight } from 'three';
 import { ScrollStateService } from '../../core/services/scroll-state.service';
 
@@ -14,20 +14,24 @@ const MOON_COLORS: Color[] = [
   new Color('#f0b8b8'), // contact — warm rose
 ];
 
-/** Rim (back-left directional) colour per section. */
+/**
+ * Rim (back-left directional) colour per section — VISION.md beat-sheet, on the
+ * consolidated cyan↔magenta identity axis. Hero anchors at pure Signal Cyan;
+ * About–Contact match their fog targets so rim and fog read as one wash.
+ */
 const RIM_COLORS: Color[] = [
-  new Color('#00e5ff'), // hero    — cyan
-  new Color('#00c8ff'), // about   — sky
-  new Color('#9060ff'), // exp     — violet
-  new Color('#00ffcc'), // skills  — mint
-  new Color('#ffcc00'), // projects — gold
-  new Color('#ff6060'), // contact — coral
+  new Color('#00e5ff'), // hero     — Signal Cyan, axis anchor
+  new Color('#24cbff'), // about    — cyan blended ~20% toward magenta
+  new Color('#b464ff'), // exp      — Signal Magenta, axis peak
+  new Color('#1bd2ff'), // skills   — cyan, operational/practical end
+  new Color('#9977ff'), // projects — cyan blended ~85% toward magenta
+  new Color('#00ffcc'), // contact  — warm-shifted cyan (teal), replaces cut coral
 ];
 
 /**
  * Moon-style scene lighting with per-section colour shifts.
  * The template places the lights into the scene.
- * injectBeforeRender lerps their colours based on ScrollStateService.
+ * beforeRender lerps their colours based on ScrollStateService.
  */
 @Component({
   selector: 'app-lighting',
@@ -68,7 +72,7 @@ export class LightingComponent {
   #rimLight:  DirectionalLight | null = null;
 
   constructor() {
-    injectBeforeRender(({ delta }) => {
+    beforeRender(({ delta }) => {
       if (!this.#isBrowser) return;
 
       // Lazy-find the two directional lights once

@@ -6,18 +6,31 @@ import {
   inject,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { injectBeforeRender, injectStore } from 'angular-three';
-import { Color, FogExp2, PerspectiveCamera } from 'three';
+import { beforeRender, injectStore } from 'angular-three';
+import {
+  Color,
+  EquirectangularReflectionMapping,
+  FogExp2,
+  PerspectiveCamera,
+  PMREMGenerator,
+  Scene,
+  WebGLRenderer,
+  WebGLRenderTarget,
+} from 'three';
+import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 import { ScrollStateService } from '../../core/services/scroll-state.service';
 
-/** Fog hex per section (0 = hero … 5 = contact). */
+/**
+ * Fog hex per section (0 = hero … 5 = contact) — VISION.md beat-sheet, on the
+ * consolidated cyan↔magenta identity axis (no other hue family owns a section).
+ */
 const FOG_COLORS: Color[] = [
-  new Color('#0d0d1a'), // hero    — deep dark navy
-  new Color('#0a1a2e'), // about   — deep blue
-  new Color('#1a0a2e'), // exp     — violet
-  new Color('#0d1f1a'), // skills  — dark teal
-  new Color('#1a1a0a'), // projects — dark amber
-  new Color('#1a0d0d'), // contact — deep crimson
+  new Color('#0a0e18'), // hero     — near-black, faint cyan tint (void)
+  new Color('#24cbff'), // about    — cyan blended ~20% toward magenta
+  new Color('#b464ff'), // exp      — Signal Magenta, axis peak
+  new Color('#1bd2ff'), // skills   — cyan, operational/practical end
+  new Color('#9977ff'), // projects — cyan blended ~85% toward magenta
+  new Color('#00ffcc'), // contact  — warm-shifted cyan (teal), replaces cut coral
 ];
 
 /** Camera Y target per section. */
@@ -25,7 +38,8 @@ const CAMERA_Y: number[] = [1.5, 1.2, 0.9, 1.6, 1.1, 0.7];
 
 /**
  * Invisible scene-graph component.
- * Runs inside NgtCanvas — manages scene fog and camera parallax per section.
+ * Runs inside NgtCanvas — sets scene-level state (fog + HDRI environment map for
+ * image-based lighting) and lerps fog colour + camera parallax per section.
  */
 @Component({
   selector: 'app-scene-controller',
@@ -37,14 +51,18 @@ export class SceneControllerComponent implements OnDestroy {
   readonly #store       = injectStore();
   readonly #scrollState = inject(ScrollStateService);
 
+  #envRenderTarget: WebGLRenderTarget | null = null;
+  #destroyed = false;
+
   constructor() {
     afterNextRender(() => {
       if (!this.#isBrowser) return;
-      const scene = this.#store.snapshot.scene;
-      scene.fog = new FogExp2(0x0d0d1a, 0.038);
+      const { scene, gl } = this.#store.snapshot;
+      scene.fog = new FogExp2(0x0a0e18, 0.038);
+      this.#loadEnvironment(scene, gl);
     });
 
-    injectBeforeRender(({ delta }) => {
+    beforeRender(({ delta }) => {
       if (!this.#isBrowser) return;
 
       const section = this.#scrollState.activeSection();
@@ -63,9 +81,39 @@ export class SceneControllerComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Generate a PMREM environment map from the CC0 night-sky HDRI and assign it
+   * as `scene.environment` for image-based lighting. Loads via `HDRLoader`
+   * (the non-deprecated successor to `RGBELoader` in three@0.182), which is a
+   * plain texture fetch — deliberately NOT counted by `ModelLoadingService`'s
+   * GLB gate, so `TOTAL_ASSETS` stays 0.
+   */
+  #loadEnvironment(scene: Scene, gl: WebGLRenderer): void {
+    const pmrem = new PMREMGenerator(gl);
+    pmrem.compileEquirectangularShader();
+
+    // Relative path (no leading slash) resolves against <base href> — /portfolio/ in prod.
+    new HDRLoader().load('env/night-sky.hdr', (texture) => {
+      if (this.#destroyed) {
+        texture.dispose();
+        pmrem.dispose();
+        return;
+      }
+      texture.mapping = EquirectangularReflectionMapping;
+      this.#envRenderTarget = pmrem.fromEquirectangular(texture);
+      scene.environment = this.#envRenderTarget.texture;
+      texture.dispose();
+      pmrem.dispose();
+    });
+  }
+
   ngOnDestroy(): void {
+    this.#destroyed = true;
     if (!this.#isBrowser) return;
     const scene = this.#store.snapshot.scene;
     scene.fog = null;
+    scene.environment = null;
+    this.#envRenderTarget?.dispose();
+    this.#envRenderTarget = null;
   }
 }

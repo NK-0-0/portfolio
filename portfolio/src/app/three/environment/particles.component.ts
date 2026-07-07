@@ -1,6 +1,6 @@
 import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { injectBeforeRender } from 'angular-three';
+import { beforeRender } from 'angular-three';
 import {
   BufferGeometry,
   PointsMaterial,
@@ -59,7 +59,7 @@ export class ParticlesComponent implements OnInit {
   constructor() {
     let elapsed = 0;
 
-    injectBeforeRender(({ delta }) => {
+    beforeRender(({ delta }) => {
       if (!this.isBrowser) return;
       elapsed += delta;
 

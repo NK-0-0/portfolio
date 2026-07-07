@@ -120,19 +120,19 @@ import { PLATFORM_ID, inject } from '@angular/core';
 readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 ```
 
-Angular's build still runs in a Node context for prerendering even though the project outputs static files only (`outputMode: "static"` in `angular.json`). Forgetting this guard causes build failures. Existing components also gate their `@if` templates and `injectBeforeRender` callbacks on `isBrowser`/`isPlatformBrowser` — follow that pattern for new 3D components.
+Angular's build still runs in a Node context for prerendering even though the project outputs static files only (`outputMode: "static"` in `angular.json`). Forgetting this guard causes build failures. Existing components also gate their `@if` templates and `beforeRender` callbacks on `isBrowser`/`isPlatformBrowser` — follow that pattern for new 3D components.
 
 ### angular-three (NGT) — correct package name
 ```bash
 npm install angular-three        # NOT @angular-three/core (outdated/wrong package)
 npm install -D angular-three-plugin
 ```
-Key imports used in this codebase: `NgtCanvas` (from `angular-three/dom`), `NgtArgs`, `injectLoader`, `injectBeforeRender`, `injectStore` (from `angular-three`).
+Key imports used in this codebase: `NgtCanvas` (from `angular-three/dom`), `NgtArgs`, `beforeRender`, `injectStore` (from `angular-three`), and `loaderResource` if a GLB is ever reintroduced.
 
-**Deprecation note (verified against the installed `angular-three@4.2.2` type definitions, 2026-07-05):** `injectLoader` and `injectBeforeRender` are marked `@deprecated` in this version — superseded by `loaderResource()` and `beforeRender()`, scheduled for removal in v5. They still work today; `injectStore` is unaffected. Don't add *new* components against the deprecated names — see `docs/vision/REQUIREMENTS.md` NFR-8 and `docs/ROADMAP.md` Milestone 3, issue 3.5 (migrating the existing ones is scheduled there, not urgent).
+**Deprecation note (verified against the installed `angular-three@4.2.2` type definitions):** `injectLoader` and `injectBeforeRender` are marked `@deprecated` in this version — superseded by `loaderResource()` and `beforeRender()`, scheduled for removal in v5. As of Milestone 3 issue 3.5 the migration is **done**: every live component in `src/` uses `beforeRender` (`grep -rn "injectBeforeRender\|injectLoader" src/` returns zero hits; the deprecated names survive only in `node_modules` type defs). `beforeRender` is a literal alias of `injectBeforeRender` (same signature, pure rename); `injectStore` was never deprecated. Don't add *new* components against the deprecated names.
 
 ### Per-frame animation pattern
-Every animated 3D component follows the same shape: build its geometry (procedurally today, or load a GLB with `injectLoader(() => GLTFLoader, () => 'models/.../file.glb')` if one is reintroduced), keep interpolated transform values as plain (non-signal) instance fields, and mutate the `Object3D` directly inside a single `injectBeforeRender(({ delta }) => { ... })` callback using `current += (target - current) * Math.min(delta * k, 1)` lerps keyed off `ScrollStateService.activeSection()`. See `hud-core.component.ts`, `data-shard.component.ts`, and `drone.component.ts` for the canonical example before adding a new animated prop.
+Every animated 3D component follows the same shape: build its geometry (procedurally today, or load a GLB with `loaderResource(() => GLTFLoader, () => 'models/.../file.glb')` if one is reintroduced), keep interpolated transform values as plain (non-signal) instance fields, and mutate the `Object3D` directly inside a single `beforeRender(({ delta }) => { ... })` callback using `current += (target - current) * Math.min(delta * k, 1)` lerps keyed off `ScrollStateService.activeSection()`. See `hud-core.component.ts`, `data-shard.component.ts`, and `drone.component.ts` for the canonical example before adding a new animated prop.
 
 ### Model loading gate
 `ModelLoadingService` counts a hardcoded `TOTAL_ASSETS` (currently `0` — every live prop is procedural, so the loader dismisses immediately) and has a 20s timeout fallback. If you add or remove a loaded GLB from the live scene graph, update `TOTAL_ASSETS` in `model-loading.service.ts` or the loader will hang or dismiss early.
