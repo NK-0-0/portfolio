@@ -12,6 +12,7 @@ import { gsap }          from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis             from 'lenis';
 import { ScrollStateService, type ActiveSection } from '../../core/services/scroll-state.service';
+import { sectionIndexFromHash } from '../../core/models/section.types';
 import { AboutComponent }      from '../sections/about/about.component';
 import { ExperienceComponent } from '../sections/experience/experience.component';
 import { SkillsComponent }     from '../sections/skills/skills.component';
@@ -170,6 +171,9 @@ export class ScrollLayoutComponent implements OnDestroy {
   #lenis?: Lenis;
   #rafId?: number;
   #hueProxy = { hue: SECTION_HUES[0] };
+  /** [hero, about, experience, skills, projects, contact], indexed by ActiveSection. */
+  #orderedSections: HTMLElement[] = [];
+  readonly #onHashChange = (): void => this.#applyHash(window.location.hash, true);
 
   constructor() {
     afterNextRender(() => {
@@ -177,7 +181,47 @@ export class ScrollLayoutComponent implements OnDestroy {
       gsap.registerPlugin(ScrollTrigger);
       this.#initLenis();
       this.#initParallax();
+      // Deep-link on load: snap (never smooth-scroll) to a hashed section once
+      // ScrollTrigger.refresh() has computed positions inside #initParallax.
+      if (window.location.hash) this.#applyHash(window.location.hash, false);
+      window.addEventListener('hashchange', this.#onHashChange);
     });
+  }
+
+  // ── Hash deep-linking (FR-10) ──────────────────────────────────────────────
+
+  /**
+   * Scroll to the section named by `hash` and sync `activeSection` immediately.
+   * Section elements carry `id`s matching their `SectionId`, so Lenis's own
+   * `scrollTo` keeps its internal offset in sync — a native hash jump or
+   * `scrollIntoView` alone would desync it. `animated` false (initial load) or
+   * reduced-motion forces an instant snap. Unknown/empty hash → hero/top.
+   */
+  #applyHash(hash: string, animated: boolean): void {
+    if (!this.#lenis) return;
+    const index = sectionIndexFromHash(hash) ?? 0;
+    const immediate = !animated || this.#prefersReducedMotion();
+
+    // Pass Lenis an absolute document offset, not the `#id` selector: a native
+    // hash-jump momentarily desyncs the element's getBoundingClientRect from
+    // Lenis's internal scroll, so the selector path computes a stale target.
+    this.#lenis.scrollTo(this.#documentOffsetTop(this.#orderedSections[index]), { immediate });
+    this.#scrollState.activeSection.set(index);
+  }
+
+  /** Absolute Y of an element from the document top — scroll- and Lenis-independent. */
+  #documentOffsetTop(el?: HTMLElement): number {
+    let y = 0;
+    let node: HTMLElement | null = el ?? null;
+    while (node) {
+      y += node.offsetTop;
+      node = node.offsetParent as HTMLElement | null;
+    }
+    return y;
+  }
+
+  #prefersReducedMotion(): boolean {
+    return this.#isBrowser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   // ── Lenis ─────────────────────────────────────────────────────────────────
@@ -210,6 +254,8 @@ export class ScrollLayoutComponent implements OnDestroy {
       this.projectsSection(),
       this.contactSection(),
     ].map(r => r.nativeElement as HTMLElement);
+
+    this.#orderedSections = [heroEl, ...sections];
 
     const cards = [
       { el: this.aboutCard().nativeElement      as HTMLElement, isLeft: true  },
@@ -372,6 +418,7 @@ export class ScrollLayoutComponent implements OnDestroy {
   // ── Cleanup ───────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
+    if (this.#isBrowser) window.removeEventListener('hashchange', this.#onHashChange);
     if (this.#rafId !== undefined) cancelAnimationFrame(this.#rafId);
     this.#lenis?.destroy();
     ScrollTrigger.getAll().forEach(t => t.kill());
