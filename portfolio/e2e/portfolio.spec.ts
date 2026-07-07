@@ -117,10 +117,17 @@ test.describe('Portfolio — live site smoke tests', () => {
         await expect(btn).toBeAttached({ timeout: 10_000 });
         await btn.evaluate((el: HTMLElement) => el.click());
 
-        // Wait for the section card to become visible (IntersectionObserver fires)
+        // Wait for the section card to reveal. The reveal is a pure GSAP opacity
+        // tween (gsap.set(el,{opacity:0}) -> gsap.to(el,{opacity:1}) on ScrollTrigger
+        // "top 76%") -- there is no "--visible" class toggle anywhere in src/, so
+        // assert the actual signal (computed opacity) instead of a phantom class.
         const card = page.locator(`#${id} .section-card`);
         await expect(card).toBeVisible({ timeout: 8_000 });
-        await expect(card).toHaveClass(/section-card--visible/, { timeout: 8_000 });
+        await expect
+          .poll(async () => Number(await card.evaluate(el => getComputedStyle(el).opacity)), {
+            timeout: 8_000,
+          })
+          .toBeGreaterThan(0.9);
 
         await page.screenshot({ path: `e2e/screenshots/section-${id}.png` });
       });
