@@ -13,6 +13,13 @@ import { defineConfig, devices } from '@playwright/test';
  * on the health-checked `url` before running, then tears it down. Artifacts
  * (outputDir + screenshots) are namespaced under local-only subfolders so a
  * local run never dirties the prod suite's tracked screenshots.
+ *
+ * Cross-browser matrix (ROADMAP Milestone 4, issue 4.7 / REQUIREMENTS NFR-9):
+ * the smoke suite runs against Chromium, WebKit, and Firefox — the three
+ * engines mapping to NFR-6's Chrome/Safari/Firefox support floor. GitHub
+ * Actions' `ubuntu-latest` + `npx playwright install --with-deps` provides all
+ * three; a sandboxed local box may be missing WebKit's system libs, in which
+ * case run a subset with `--project=chromium --project=firefox`.
  */
 
 const PORT = 4173;
@@ -36,6 +43,14 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
     },
   ],
   webServer: {
