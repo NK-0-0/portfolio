@@ -13,7 +13,7 @@
   --color-magenta:    #b464ff;  /* Signal Magenta — identity axis secondary */
   --color-green:      #39ff9d;  /* terminal green — functional/element-level only */
   --color-text:       #e6ecf5;  /* text primary        */
-  --color-muted:      #6b7691;  /* text muted          */
+  --color-muted:      #848da4;  /* text muted — 6.10:1 on --color-bg (WCAG AA body) */
   --color-amber:      #ffcc00;  /* live-status amber — functional/element-level only */
   --color-danger:     #ff3b3b;  /* danger — UI form-validation only */
   --color-tag-bg:     rgba(0, 229, 255, 0.07);
@@ -34,6 +34,14 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* FR-9: keyboard focus indicator on every focusable element (skip-nav,
+   in-content links, form fields). Signal Cyan clears WCAG 2.4.11 non-text
+   contrast (≥12.4:1 on every dark surface here). */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 html, body {

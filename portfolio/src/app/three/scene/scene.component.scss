@@ -60,6 +60,5 @@ app-footer {
   border-radius: 4px;
   padding: 4px 10px;
   cursor: pointer;
-
-  &:focus { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  /* Focus outline handled globally by :focus-visible in styles.scss (FR-9). */
 }
