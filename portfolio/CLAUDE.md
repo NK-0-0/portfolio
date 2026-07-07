@@ -47,8 +47,11 @@ npx playwright test
 
 # Lighthouse CI (against a local production build)
 ng build --configuration production
-npx lhci autorun
+npx @lhci/cli autorun
 ```
+
+Note: `npx lhci autorun` (without `@lhci/cli`) resolves to an unrelated npm-squatted
+package that silently no-ops — always use `@lhci/cli` explicitly.
 
 Lint is `npm run lint` (`ng lint`, angular-eslint flat config in `eslint.config.js`) — added in Milestone 0.7 and run in CI (`.github/workflows/ci.yml`). Formatting is Prettier (`.prettierrc`: single quotes, 100 print width).
 
