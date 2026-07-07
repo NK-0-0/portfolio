@@ -15,6 +15,9 @@
 # Only optimized output that lands in public/models/ gets committed.
 /assets-staging
 
+# Lighthouse CI report output (npx @lhci/cli autorun) — regenerated each run.
+/.lighthouseci
+
 # Node
 /node_modules
 npm-debug.log
