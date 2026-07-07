@@ -1,24 +1,28 @@
 /* ============================================================
-   Global design tokens and resets — Interactive 3D Portfolio
+   Global design tokens and resets — Signal Ghost sci-fi identity
+   Palette source of truth: docs/vision/VISION.md palette table.
    ============================================================ */
 
 :root {
   --bg-hue:           240;      /* tweened by GSAP per section */
-  --color-bg:         #080810;
-  --color-bg-panel:   #0e1120;
+  --color-bg:         #05060a;  /* background / void   */
+  --color-bg-panel:   #0b0f1a;  /* surface panel       */
   --color-bg-overlay: rgba(0, 0, 0, 0.72);
-  --color-accent:     #00d4f5;
-  --color-accent-dim: #0097b8;
-  --color-text:       #dde4ee;
-  --color-muted:      #5a6880;
-  --color-amber:      #e8950a;
-  --color-tag-bg:     rgba(0, 212, 245, 0.07);
-  --color-tag-border: rgba(0, 212, 245, 0.22);
+  --color-accent:     #00e5ff;  /* Signal Cyan — identity axis primary   */
+  --color-accent-dim: #008a99;  /* derived dim cyan (no VISION value; same hue, lower value) */
+  --color-magenta:    #b464ff;  /* Signal Magenta — identity axis secondary */
+  --color-green:      #39ff9d;  /* terminal green — functional/element-level only */
+  --color-text:       #e6ecf5;  /* text primary        */
+  --color-muted:      #6b7691;  /* text muted          */
+  --color-amber:      #ffcc00;  /* live-status amber — functional/element-level only */
+  --color-danger:     #ff3b3b;  /* danger — UI form-validation only */
+  --color-tag-bg:     rgba(0, 229, 255, 0.07);
+  --color-tag-border: rgba(0, 229, 255, 0.22);
 
   /* ── Typography ─────────────────────────────────────── */
-  --font-display: 'Dela Gothic One', sans-serif;          /* hero name only   */
-  --font-heading: 'Shippori Mincho B1', 'Noto Serif JP', serif; /* section headings */
-  --font-ui:      'Noto Sans JP', -apple-system, sans-serif;
+  --font-display: 'Chakra Petch', sans-serif;             /* hero name / display */
+  --font-heading: 'Rajdhani', sans-serif;                 /* section headings    */
+  --font-ui:      'Inter', -apple-system, sans-serif;     /* body / UI copy      */
   --font-mono:    'JetBrains Mono', 'Courier New', monospace;
 
   --transition-panel: 400ms cubic-bezier(0.4, 0, 0.2, 1);

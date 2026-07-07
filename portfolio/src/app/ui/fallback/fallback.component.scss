@@ -10,8 +10,8 @@
   display: flex;
   align-items: center;
   padding: 80px 24px 60px;
-  background: linear-gradient(180deg, #0d1a2e 0%, var(--color-bg) 100%);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+  background: linear-gradient(180deg, var(--color-bg-panel) 0%, var(--color-bg) 100%);
+  border-bottom: 1px solid var(--color-tag-border);
 }
 
 .hero-inner {
@@ -32,7 +32,7 @@
   font-family: var(--font-display);
   font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 700;
-  color: #fff;
+  color: var(--color-text);
   line-height: 1.1;
   margin-bottom: 8px;
 }

@@ -25,7 +25,7 @@ const SECTION_HUES: number[] = [240, 220, 270, 170, 45, 0];
  * Full-page scrollable content layer.
  *
  * Parallax layers (slowest → fastest):
- *  0.20× — background kanji characters
+ *  0.20× — background decorative HUD glyphs (aria-hidden, never the label)
  *  0.45× — section label / number
  *  0.70× — hero tagline
  *  0.85× — hero role
@@ -47,8 +47,12 @@ const SECTION_HUES: number[] = [240, 220, 270, 170, 45, 0];
   template: `
     <!-- ── Hero ─────────────────────────────────────────────────────── -->
     <section class="section section--hero" #heroSection>
-      <!-- Deep parallax kanji — moves slowest -->
-      <span class="kanji kanji--hero" aria-hidden="true">忍</span>
+      <!-- Deep-parallax decorative HUD glyph (Boot Sequence) — moves slowest, aria-hidden -->
+      <svg class="hud-glyph hud-glyph--hero" viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M12 30V12H30M108 90V108H90" />
+        <circle cx="60" cy="62" r="24" />
+        <path d="M60 30V60" />
+      </svg>
 
       <div class="hero-content">
         <span class="hero-label">Portfolio</span>
@@ -65,7 +69,13 @@ const SECTION_HUES: number[] = [240, 220, 270, 170, 45, 0];
 
     <!-- ── About ──────────────────────────────────────────────── left -->
     <section class="section" id="about" #aboutSection>
-      <span class="kanji" aria-hidden="true">我</span>
+      <!-- Identity Core glyph — decorative, aria-hidden -->
+      <svg class="hud-glyph" viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M12 30V12H30M108 90V108H90" />
+        <path d="M60 26 94 60 60 94 26 60Z" />
+        <path d="M60 44 76 60 60 76 44 60Z" />
+        <circle class="dot" cx="60" cy="60" r="3" />
+      </svg>
       <p class="section__label">01 &nbsp;/&nbsp; About</p>
       <div class="section-card section-card--left" #aboutCard>
         <app-about />
@@ -74,7 +84,14 @@ const SECTION_HUES: number[] = [240, 220, 270, 170, 45, 0];
 
     <!-- ── Experience ─────────────────────────────────────────── right -->
     <section class="section" id="experience" #experienceSection>
-      <span class="kanji" aria-hidden="true">道</span>
+      <!-- Mission Log glyph — decorative, aria-hidden -->
+      <svg class="hud-glyph" viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M12 30V12H30M108 90V108H90" />
+        <path d="M40 40V80" />
+        <path d="M40 48H80" />
+        <path d="M40 60H72" />
+        <path d="M40 72H64" />
+      </svg>
       <p class="section__label section__label--right">02 &nbsp;/&nbsp; Experience</p>
       <div class="section-card section-card--right" #experienceCard>
         <app-experience />
@@ -83,7 +100,12 @@ const SECTION_HUES: number[] = [240, 220, 270, 170, 45, 0];
 
     <!-- ── Skills ─────────────────────────────────────────────── left -->
     <section class="section" id="skills" #skillsSection>
-      <span class="kanji" aria-hidden="true">技</span>
+      <!-- Loadout glyph — decorative, aria-hidden -->
+      <svg class="hud-glyph" viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M12 30V12H30M108 90V108H90" />
+        <path d="M60 30 86 45 86 75 60 90 34 75 34 45Z" />
+        <circle cx="60" cy="60" r="11" />
+      </svg>
       <p class="section__label">03 &nbsp;/&nbsp; Skills</p>
       <div class="section-card section-card--left" #skillsCard>
         <app-skills />
@@ -92,7 +114,12 @@ const SECTION_HUES: number[] = [240, 220, 270, 170, 45, 0];
 
     <!-- ── Projects (clean parallax) ──────────────────────────── right -->
     <section class="section section--clean" id="projects" #projectsSection>
-      <span class="kanji" aria-hidden="true">創</span>
+      <!-- Deployed Constructs glyph — decorative, aria-hidden -->
+      <svg class="hud-glyph" viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M12 30V12H30M108 90V108H90" />
+        <rect x="36" y="36" width="30" height="30" />
+        <rect x="54" y="54" width="30" height="30" />
+      </svg>
       <p class="section__label section__label--right">04 &nbsp;/&nbsp; Projects</p>
       <div class="section-card section-card--right" #projectsCard>
         <app-projects />
@@ -101,7 +128,14 @@ const SECTION_HUES: number[] = [240, 220, 270, 170, 45, 0];
 
     <!-- ── Contact (clean parallax) ───────────────────────────── left -->
     <section class="section section--clean" id="contact" #contactSection>
-      <span class="kanji" aria-hidden="true">繋</span>
+      <!-- Uplink glyph — decorative, aria-hidden -->
+      <svg class="hud-glyph" viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M12 30V12H30M108 90V108H90" />
+        <circle class="dot" cx="60" cy="84" r="3.5" />
+        <path d="M60 84V62" />
+        <path d="M44 58A24 24 0 0 1 76 58" />
+        <path d="M34 48A38 38 0 0 1 86 48" />
+      </svg>
       <p class="section__label">05 &nbsp;/&nbsp; Contact</p>
       <div class="section-card section-card--left" #contactCard>
         <app-contact />
@@ -201,21 +235,21 @@ export class ScrollLayoutComponent implements OnDestroy {
     const heroRole    = heroEl.querySelector('.hero-role')    as HTMLElement;
     const heroTagline = heroEl.querySelector('.hero-tagline') as HTMLElement;
     const scrollCue   = heroEl.querySelector('.scroll-cue')   as HTMLElement;
-    const heroKanji   = heroEl.querySelector('.kanji')        as HTMLElement;
+    const heroGlyph   = heroEl.querySelector('.hud-glyph')    as HTMLElement;
 
     heroTl
-      .to(heroKanji,   { y: -160, opacity: 0, ease: 'none' }, 0)     // 0.20× speed feel
+      .to(heroGlyph,   { y: -160, opacity: 0, ease: 'none' }, 0)     // 0.20× speed feel
       .to(heroTagline, { y: -50,  opacity: 0, ease: 'none' }, 0)     // 0.70×
       .to(heroRole,    { y: -70,  opacity: 0, ease: 'none' }, 0)     // 0.85×
       .to(heroLabel,   { y: -85,  opacity: 0, ease: 'none' }, 0)     // surface
       .to(heroName,    { y: -100, opacity: 0, ease: 'none' }, 0)     // 1.00×
       .to(scrollCue,   { y: -40,  opacity: 0, ease: 'none' }, 0);
 
-    // ── Background kanji per section: drift upward at 0.35× ──────────────
+    // ── Background HUD glyph per section: drift upward at 0.35× ──────────
     sections.forEach(sectionEl => {
-      const kanji = sectionEl.querySelector('.kanji') as HTMLElement | null;
-      if (!kanji) return;
-      gsap.to(kanji, {
+      const glyph = sectionEl.querySelector('.hud-glyph') as HTMLElement | null;
+      if (!glyph) return;
+      gsap.to(glyph, {
         y: -110,
         ease: 'none',
         scrollTrigger: {
