@@ -27,14 +27,18 @@ None of this is a code change; it is all `src/app/content/portfolio.content.ts`.
 
 ## Open — product decisions
 
-- [ ] **HUD travel takes ~19 seconds hill→campfire.** The avatar physically walks to the
-      destination. This is faithful to the prototype but is a long wait for someone who clicks a nav
-      item. Options: a faster travel speed when the destination came from the HUD, a fade-cut, or
-      leave it as a deliberate pacing choice.
-- [ ] **No mobile or touch story.** The world is keyboard- and pointer-driven, and the panels are
-      sized in `vw` against a desktop layout. The old project had an explicit 2D fallback for
-      mobile; the port has none. Needs either touch controls, a reduced layout, or a deliberate
-      "desktop only" stance.
+- [x] **HUD travel time** — done 2026-08-23. Travel now holds a target duration (~4.5s cap)
+      floored at run speed, and the view eases out while sprinting so the speed reads as motion
+      rather than a teleport. Hill→campfire went from 19s to ~4.5s; short hops stayed quick.
+- [x] **Mobile / touch** — done 2026-08-23. Pixel scale now derives from the tighter viewport
+      axis, portrait re-frames the scene (ground and horizon lift, camera centres), panels dock as
+      bottom sheets, the chapter nav becomes a horizontal strip, and the prompt bubble doubles as
+      the touch interact control. Tap-to-walk and drag-to-scrub are wired with a 10px threshold.
+- [ ] **Real-device performance is unmeasured.** At portrait scale a phone repaints ~82k buffer
+      pixels/frame vs a laptop's 64k, on weaker hardware. `npm run perf:fps` is Chromium-desktop
+      only and won't catch this — it needs a real device.
+- [ ] **Landscape phones** fall on the desktop side of the 720px breakpoint and the `h/w > 1.3`
+      portrait test, so they get the side-panel layout in a 390px-tall viewport. Untested.
 - [ ] **Canvas content is invisible to assistive tech.** The overlay is fully accessible and the
       canvas is `aria-hidden`, so nothing is *lost* — but the world itself conveys mood, not
       information. Worth confirming that is the intent.

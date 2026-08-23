@@ -74,3 +74,11 @@
   border: 0;
   background: linear-gradient(90deg, rgb(255 250 240 / 0.2), rgb(255 250 240 / 0));
 }
+
+@media (max-width: 720px) {
+  :host {
+    top: auto;
+    width: auto;
+    max-height: var(--sheet-max);
+  }
+}

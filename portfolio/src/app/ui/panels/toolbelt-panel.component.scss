@@ -85,3 +85,21 @@
   line-height: 1.6;
   color: var(--ink-mute);
 }
+
+@media (max-width: 720px) {
+  :host {
+    width: auto;
+  }
+
+  .grid {
+    /* Four across instead of three: the tiles are square, so on a narrow sheet
+       three columns makes them taller than the copy they sit above. */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .tile__icon {
+    width: 26px;
+    height: 26px;
+  }
+}

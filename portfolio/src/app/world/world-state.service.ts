@@ -86,6 +86,14 @@ export class WorldStateService {
     this.renderer?.travelTo(chapter);
   }
 
+  /**
+   * Trigger the current stop's interaction — the `E` key's counterpart for
+   * pointer and touch, wired to the prompt bubble the world already shows.
+   */
+  interact(): void {
+    this.renderer?.toggleAction();
+  }
+
   openDetail(index: number): void {
     this.detail.set(index);
     this.renderer?.setDetailOpen(index);

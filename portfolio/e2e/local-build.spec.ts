@@ -85,11 +85,91 @@ test.describe('pixel world', () => {
     await expect(dialog).toBeHidden();
   });
 
+  test('fast travel crosses the whole world in a few seconds', async ({ page }) => {
+    // Travel holds a target duration rather than a constant speed, so the
+    // longest trip is capped. Before that change this took ~19s.
+    const started = Date.now();
+    await page.getByRole('button', { name: 'CAMPFIRE' }).click();
+    await expect(panel(page, 5)).toHaveClass(/is-open/, { timeout: WALK });
+    expect(Date.now() - started).toBeLessThan(9_000);
+  });
+
   test('keyboard walking moves the avatar east', async ({ page }) => {
     const before = await page.locator('.progress__fill').evaluate((el) => el.clientWidth);
     await page.keyboard.down('ArrowRight');
     await page.waitForTimeout(1200);
     await page.keyboard.up('ArrowRight');
+    const after = await page.locator('.progress__fill').evaluate((el) => el.clientWidth);
+    expect(after).toBeGreaterThan(before);
+  });
+});
+
+
+test.describe('narrow viewport', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await ready(page);
+  });
+
+  test('frames the world at a usable zoom', async ({ page }) => {
+    // Pixel scale is derived from the tighter axis. Deriving it from height
+    // alone left a phone at desktop scale, showing ~3% of the world.
+    const { canvasWidth, viewportWidth } = await page.evaluate(() => {
+      const cv = document.querySelector('app-pixel-world canvas') as HTMLCanvasElement;
+      return { canvasWidth: cv.width, viewportWidth: window.innerWidth };
+    });
+    expect(canvasWidth).toBe(viewportWidth);
+    await page.screenshot({ path: 'e2e/screenshots/local/mobile-hill.png' });
+  });
+
+  test('docks the panel to the bottom as a sheet', async ({ page }) => {
+    const sheet = panel(page, 0);
+    await expect(sheet).toHaveClass(/is-open/);
+
+    const box = (await sheet.boundingBox())!;
+    const viewport = page.viewportSize()!;
+    // Full-bleed horizontally, anchored to the bottom edge, and leaving the
+    // upper half of the world visible.
+    expect(box.x).toBeLessThanOrEqual(1);
+    expect(box.width).toBeGreaterThan(viewport.width - 2);
+    expect(box.y + box.height).toBeGreaterThan(viewport.height - 2);
+    expect(box.y).toBeGreaterThan(viewport.height * 0.4);
+  });
+
+  test('lays the chapter nav out as a horizontal strip', async ({ page }) => {
+    const links = page.getByRole('navigation', { name: 'Chapters' }).getByRole('button');
+    const first = (await links.first().boundingBox())!;
+    const second = (await links.nth(1).boundingBox())!;
+    expect(second.x).toBeGreaterThan(first.x);
+    expect(Math.abs(second.y - first.y)).toBeLessThan(2);
+  });
+
+  test('shows touch instructions instead of key bindings', async ({ page }) => {
+    await expect(page.getByText(/TAP THE GROUND TO WALK/)).toBeVisible();
+    await expect(page.getByText(/SHIFT RUN/)).toBeHidden();
+  });
+
+  test('taps the prompt to interact, with no keyboard', async ({ page }) => {
+    const prompt = page.locator('.prompt');
+    await expect(prompt).toHaveClass(/is-open/);
+    await expect(prompt).toContainText('SIT ON THE SWING');
+
+    await prompt.click();
+    await expect(prompt).toContainText('GET UP');
+    await page.screenshot({ path: 'e2e/screenshots/local/mobile-interact.png' });
+
+    await prompt.click();
+    await expect(prompt).toContainText('SIT ON THE SWING');
+  });
+
+  test('taps the ground to walk there', async ({ page }) => {
+    const before = await page.locator('.progress__fill').evaluate((el) => el.clientWidth);
+    // Above the bottom sheet, in the strip of ground the portrait framing
+    // deliberately keeps clear.
+    await page.locator('app-pixel-world canvas').tap({ position: { x: 360, y: 370 } });
+    await page.waitForTimeout(1500);
     const after = await page.locator('.progress__fill').evaluate((el) => el.clientWidth);
     expect(after).toBeGreaterThan(before);
   });

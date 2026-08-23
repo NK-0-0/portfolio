@@ -44,21 +44,33 @@ import { WorldStateService } from '../../world/world-state.service';
         <span class="legend__pip" aria-hidden="true"></span>
         FLAGS {{ state.visitedCount() }}/{{ chapters.length }}
       </span>
-      @for (line of controls; track line) {
-        <span class="legend__keys">{{ line }}</span>
+      @for (line of controls.keyboard; track line) {
+        <span class="legend__line legend__line--keys">{{ line }}</span>
+      }
+      @for (line of controls.touch; track line) {
+        <span class="legend__line legend__line--touch">{{ line }}</span>
       }
     </div>
 
-    <div
+    <!--
+      The prompt doubles as the touch interact control. It already appears
+      exactly when an interaction is available and already names it, so making
+      it pressable adds the whole touch affordance without adding any UI.
+      Hidden from the a11y tree while inactive so it can't be tabbed to.
+    -->
+    <button
+      type="button"
       class="prompt"
       [class.is-open]="state.promptVisible()"
       [style.left.px]="state.promptX()"
       [style.top.px]="state.promptY()"
-      aria-hidden="true"
+      [attr.tabindex]="state.promptVisible() ? 0 : -1"
+      [attr.aria-hidden]="!state.promptVisible()"
+      (click)="state.interact()"
     >
-      <span class="prompt__key">E</span>
+      <span class="prompt__key" aria-hidden="true">E</span>
       <span class="prompt__label">{{ state.promptText() }}</span>
-    </div>
+    </button>
 
     <div class="progress" role="presentation">
       <div class="progress__fill" [style.width.%]="state.phase() * 100"></div>
