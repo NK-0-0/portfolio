@@ -35,9 +35,12 @@ import {
     <a class="skip" href="#work">Skip to work</a>
 
     <header class="masthead">
-      <div>
-        <p class="kicker">{{ identity.name }}</p>
-        <p class="kicker kicker--dim">{{ identity.tagline }}</p>
+      <div class="masthead__id">
+        <img class="mark" src="mark.svg" alt="" width="28" height="28" />
+        <div>
+          <p class="kicker">{{ identity.name }}</p>
+          <p class="kicker kicker--dim">{{ identity.tagline }}</p>
+        </div>
       </div>
       <a class="btn" routerLink="/">ENTER THE WORLD &rarr;</a>
     </header>

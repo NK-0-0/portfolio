@@ -233,3 +233,31 @@ test.describe('read view', () => {
     expect(overflows).toBe(false);
   });
 });
+
+
+test.describe('brand', () => {
+  test('serves every icon the page asks for', async ({ page, request }) => {
+    await page.goto('/');
+    const hrefs = await page
+      .locator('link[rel~="icon"], link[rel="apple-touch-icon"]')
+      .evaluateAll((els) => els.map((e) => (e as HTMLLinkElement).getAttribute('href')!));
+    expect(hrefs.length).toBeGreaterThanOrEqual(3);
+    for (const href of hrefs) {
+      const res = await request.get(`/${href}`);
+      expect(res.status(), `${href} should be served`).toBe(200);
+      expect((await res.body()).length).toBeGreaterThan(0);
+    }
+  });
+
+  test('shows the mark in the world header and on the read page', async ({ page }) => {
+    await page.goto('/');
+    await ready(page);
+    // A broken <img> still "exists", so assert it actually decoded.
+    const drawn = (locator: string) =>
+      page.locator(locator).evaluate((el) => (el as HTMLImageElement).naturalWidth > 0);
+    expect(await drawn('.identity .mark')).toBe(true);
+
+    await page.goto('/#/read');
+    expect(await drawn('.masthead .mark')).toBe(true);
+  });
+});

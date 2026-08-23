@@ -48,6 +48,7 @@ See [`CLAUDE.md`](../../CLAUDE.md) for the full map. The short version:
 - Changing **how the world is drawn** → `src/app/world/world-renderer.ts`
 - Changing **the overlay** → `src/app/ui/**`
 - Changing **shared visual tokens** → `src/styles.scss`
+- Changing **the logo** → the grid in `scripts/make-brand.mjs`, then `npm run brand`
 
 ## Debugging the world
 

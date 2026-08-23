@@ -15,11 +15,18 @@ Last updated: 2026-08-23 — pixel-world port.
 
 The entire world is **original pixel art**, authored as character maps in
 `src/app/world/sprites.ts` and drawn procedurally by `world-renderer.ts`.
-There are no image files, no 3D models, and no third-party artwork of any kind.
+There are no 3D models and no third-party artwork of any kind. The only committed image files are
+the generated brand marks and the README preview screenshots, all produced from this repo.
+
+The logo is the flag the avatar plants at each stop — the same pennant `world-renderer.ts` draws in
+`flags()`. It is defined as a character grid in `scripts/make-brand.mjs` and rendered to
+`favicon.svg`, `mark.svg`, `favicon.ico` and `apple-touch-icon.png` by `npm run brand`. Edit the
+grid, re-run, commit the output.
 
 | Asset | Source | License | Attribution required |
 |---|---|---|---|
 | Avatar, dog, scenery, terrain sprites | Original — `src/app/world/sprites.ts` | n/a (original) | No |
+| Site logo — favicon, touch icon, header mark | Original — generated from the pixel grid in `scripts/make-brand.mjs` (`npm run brand`) | n/a (original) | No |
 | Day/dusk/night palettes | Original — `src/app/world/palette.ts` | n/a (original) | No |
 
 ## Fonts (Google Fonts, loaded from `fonts.googleapis.com`)

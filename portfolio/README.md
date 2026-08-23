@@ -82,6 +82,12 @@ Project screenshots go in `public/projects/` and are referenced by `detail.image
 Colour and typography tokens are CSS custom properties at the top of `src/styles.scss`. The world's
 own palettes (day, dusk, night) are in `src/app/world/palette.ts`.
 
+## The mark
+
+The logo is the flag the avatar plants at each stop, defined as a character grid in
+`scripts/make-brand.mjs` — the same way every other piece of art in this project is defined. Run
+`npm run brand` to regenerate the favicon, touch icon and in-page mark, then commit them.
+
 ## Scripts
 
 ```bash
@@ -92,6 +98,8 @@ npm run lint             # angular-eslint
 npx ng test --no-watch   # Vitest unit tests
 npm run e2e:local        # Playwright against a locally built production bundle
 npm run perf:fps         # frame-timing regression gate (p95, 15% tolerance)
+npm run lighthouse       # production build + Lighthouse CI
+npm run brand            # regenerate favicon / touch icon / header mark
 ```
 
 ## Quality gates
@@ -101,7 +109,7 @@ suite across Chromium, Firefox and WebKit. Lighthouse CI asserts accessibility �
 best-practices ≥ 0.95 as hard errors.
 
 Current production bundle: **300 kB raw / 81 kB transferred**, with the document view code-split out. Lighthouse: 100 accessibility, 100 best
-practices, 100 SEO, 99 performance.
+practices, 100 SEO, and 97–100 performance depending on the run.
 
 ## Origin
 

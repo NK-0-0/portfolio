@@ -47,6 +47,17 @@ footer {
   border-bottom: 1px solid var(--hairline);
 }
 
+.masthead__id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mark {
+  flex: 0 0 auto;
+  image-rendering: pixelated;
+}
+
 .kicker {
   margin: 0;
   font-family: var(--font-pixel);

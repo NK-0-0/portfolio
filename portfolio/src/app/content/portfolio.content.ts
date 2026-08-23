@@ -252,10 +252,11 @@ export const COLOPHON = {
   body: 'No engine and no images — the world is a 2D canvas, and every sprite is a grid of characters in a TypeScript file. The simulation is a plain class that knows nothing about Angular; it publishes state to signals, and the DOM overlay you are reading renders from those.',
   facts: [
     { label: 'BUILT WITH', value: 'Angular 21, zoneless signals, Canvas 2D' },
+    { label: 'ARTWORK', value: 'Original — sprites and the logo are character grids in the source' },
     { label: 'BUNDLE', value: '300 kB raw · 81 kB transferred' },
     {
       label: 'LIGHTHOUSE',
-      value: '100 accessibility · 100 best practices · 100 SEO · 99 performance',
+      value: '100 accessibility · 100 best practices · 100 SEO · 97+ performance',
     },
     { label: 'TESTED', value: '23 unit specs · 32 e2e across Chromium, Firefox and WebKit' },
     { label: 'GATED', value: 'Lint, typecheck, unit, e2e, Lighthouse and a frame-timing budget in CI' },

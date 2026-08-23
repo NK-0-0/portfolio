@@ -20,7 +20,12 @@ import { WorldStateService } from '../../world/world-state.service';
   template: `
     <header class="header">
       <div class="chip identity">
-        <span class="dot" aria-hidden="true"></span>
+        <!--
+          The generated mark (scripts/make-brand.mjs), fieldless variant so it
+          sits on the frosted chip rather than punching a navy box through it.
+          Referenced rather than inlined so there is one definition of the logo.
+        -->
+        <img class="mark" src="mark.svg" alt="" width="16" height="16" />
         <span class="name">{{ identity.name }}</span>
         <span class="tagline">· {{ identity.tagline }}</span>
       </div>

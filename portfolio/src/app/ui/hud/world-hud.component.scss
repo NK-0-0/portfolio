@@ -20,11 +20,11 @@
   gap: 11px;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  background: var(--accent);
-  box-shadow: 0 0 0 3px rgb(255 217 138 / 0.2);
+.mark {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 0 6px rgb(255 217 138 / 0.35));
 }
 
 .name {

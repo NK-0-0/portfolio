@@ -11,7 +11,8 @@
     "perf:fps": "ng build --configuration production && node scripts/measure-fps.mjs",
     "lint": "ng lint",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
-    "lighthouse": "ng build --configuration production && lhci autorun"
+    "lighthouse": "ng build --configuration production && lhci autorun",
+    "brand": "node scripts/make-brand.mjs"
   },
   "private": true,
   "packageManager": "npm@11.9.0",

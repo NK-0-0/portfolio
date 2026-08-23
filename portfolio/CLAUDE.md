@@ -180,6 +180,18 @@ Chapter order is load-bearing in three places that must stay in sync:
 
 `world.model.spec.ts` guards ordering, bounds, pose validity, and non-overlapping radii.
 
+### Editing the logo
+
+The site mark is the flag the avatar plants at each stop — the same pennant `flags()` draws, and
+what the HUD counts as "FLAGS n/6". It is a character grid in `scripts/make-brand.mjs`; run
+`npm run brand` to regenerate `favicon.svg`, `mark.svg`, `favicon.ico` and `apple-touch-icon.png`,
+then commit the output. Do not hand-edit the generated files, and do not inline the mark's rects
+into a template — there should be one definition of the logo.
+
+Two things the script enforces because both were got wrong once: raster sizes must be whole
+multiples of the 16px grid (180 is not, and gives visibly uneven pixels), and the grid is validated
+for row length and palette keys.
+
 ### Editing the art
 
 Sprites are arrays of equal-length strings; each character is a key into `PAL`, `.` is transparent.
