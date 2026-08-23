@@ -6,9 +6,9 @@ the progress bar, the HUD. Dawn on the hill, nightfall at the campfire.
 
 Live at **<https://nk-0-0.github.io/portfolio/>**
 
-| Dawn on the hill | Nightfall at the campfire |
-|---|---|
-| ![The opening hill at morning](docs/media/preview-morning.png) | ![The campfire at nightfall](docs/media/preview-nightfall.png) |
+| Dawn on the hill | Nightfall at the campfire | Portrait |
+|---|---|---|
+| ![The opening hill at morning](docs/media/preview-morning.png) | ![The campfire at nightfall](docs/media/preview-nightfall.png) | ![The hill on a phone](docs/media/preview-mobile.png) |
 
 ---
 
@@ -45,10 +45,15 @@ than a 1080p one.
 | `←` `→` or `A` `D` | Walk |
 | `Shift` | Run |
 | `E` | Interact at the current stop |
-| Click the ground | Walk there |
-| Click the avatar / the dog | They react |
-| Wheel / trackpad | Scrub along the world |
+| Click / tap the ground | Walk there |
+| Click / tap the avatar or the dog | They react |
+| Tap the prompt bubble | Interact — the touch stand-in for `E` |
+| Wheel, trackpad, or drag | Scrub along the world |
+| Chapter nav | Fast-travel, capped at ~4.5s for any trip |
 | `Esc` | Close a case study |
+
+On phones the world re-frames for portrait, panels dock as bottom sheets, and the chapter nav
+becomes a horizontal strip.
 
 ## Getting started
 

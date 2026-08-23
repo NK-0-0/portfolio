@@ -167,3 +167,36 @@
   letter-spacing: 0.12em;
   color: var(--accent-warm);
 }
+
+@media (max-width: 720px) {
+  .caption {
+    align-self: center;
+  }
+
+  .caption .meta {
+    display: none;
+  }
+
+  .row {
+    width: 100%;
+    gap: 0;
+  }
+
+  /* The arrows are redundant once the rail is a native touch-scroll surface. */
+  .nudge {
+    display: none;
+  }
+
+  .rail {
+    padding: 4px 16px 8px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .rail > li {
+    scroll-snap-align: center;
+  }
+
+  .card {
+    width: 232px;
+  }
+}

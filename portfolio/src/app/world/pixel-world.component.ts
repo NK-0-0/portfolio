@@ -12,6 +12,11 @@ import {
 import { WorldRenderer } from './world-renderer';
 import { WorldStateService } from './world-state.service';
 
+/** Movement in CSS px before a press stops being a tap and becomes a scrub. */
+const DRAG_THRESHOLD = 10;
+/** World pixels moved per CSS pixel dragged. */
+const DRAG_GAIN = 1.4;
+
 /**
  * Host for the pixel world canvas.
  *
@@ -34,6 +39,9 @@ import { WorldStateService } from './world-state.service';
       height: 100%;
       image-rendering: pixelated;
       cursor: pointer;
+      /* Claim touch gestures: without this the browser's own pan/zoom wins and
+         every tap-to-walk is swallowed as the start of a scroll. */
+      touch-action: none;
     }
   `,
 })
@@ -47,6 +55,9 @@ export class PixelWorldComponent {
   private readonly state = inject(WorldStateService);
   private readonly host = inject(ElementRef<HTMLElement>);
   private renderer: WorldRenderer | null = null;
+  private pointerStartX: number | null = null;
+  private pointerLastX = 0;
+  private dragging = false;
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -69,13 +80,18 @@ export class PixelWorldComponent {
       const onKeyDown = (e: KeyboardEvent) => this.onKeyDown(e, renderer);
       const onKeyUp = (e: KeyboardEvent) => this.onKeyUp(e, renderer);
       const onWheel = (e: WheelEvent) => this.onWheel(e, renderer);
-      const onPointerDown = (e: PointerEvent) => this.onPointerDown(e, renderer);
+      const onPointerDown = (e: PointerEvent) => this.onPointerDown(e);
+      const onPointerMove = (e: PointerEvent) => this.onPointerMove(e, renderer);
+      const onPointerUp = (e: PointerEvent) => this.onPointerUp(e, renderer);
 
       window.addEventListener('resize', onResize);
       window.addEventListener('keydown', onKeyDown);
       window.addEventListener('keyup', onKeyUp);
       window.addEventListener('wheel', onWheel, { passive: true });
       this.host.nativeElement.addEventListener('pointerdown', onPointerDown);
+      this.host.nativeElement.addEventListener('pointermove', onPointerMove);
+      this.host.nativeElement.addEventListener('pointerup', onPointerUp);
+      this.host.nativeElement.addEventListener('pointercancel', onPointerUp);
 
       let raf = 0;
       let logged = false;
@@ -101,6 +117,9 @@ export class PixelWorldComponent {
         window.removeEventListener('keyup', onKeyUp);
         window.removeEventListener('wheel', onWheel);
         this.host.nativeElement.removeEventListener('pointerdown', onPointerDown);
+        this.host.nativeElement.removeEventListener('pointermove', onPointerMove);
+        this.host.nativeElement.removeEventListener('pointerup', onPointerUp);
+        this.host.nativeElement.removeEventListener('pointercancel', onPointerUp);
         this.state.detach();
         this.renderer = null;
       });
@@ -154,9 +173,44 @@ export class PixelWorldComponent {
     renderer.nudge(e.deltaY * 0.5 + e.deltaX * 0.5);
   }
 
-  private onPointerDown(e: PointerEvent, renderer: WorldRenderer): void {
+  /**
+   * Pointer down / move / up implement both gestures on one input.
+   *
+   * A press that never travels further than `DRAG_THRESHOLD` is a tap — walk
+   * there, or poke whoever was tapped. A press that does travel becomes a
+   * drag-scrub of the world, the touch equivalent of the wheel handler. The
+   * decision is deferred to pointerup, so a tap is never mistaken for a
+   * one-pixel drag on a shaky finger.
+   */
+  private onPointerDown(e: PointerEvent): void {
     if (this.state.detail() >= 0) return;
     if (e.target !== this.canvas().nativeElement) return;
-    renderer.pointerAt(e.clientX);
+    this.pointerStartX = e.clientX;
+    this.pointerLastX = e.clientX;
+    this.dragging = false;
+    this.canvas().nativeElement.setPointerCapture(e.pointerId);
+  }
+
+  private onPointerMove(e: PointerEvent, renderer: WorldRenderer): void {
+    if (this.pointerStartX === null) return;
+    if (!this.dragging && Math.abs(e.clientX - this.pointerStartX) > DRAG_THRESHOLD) {
+      this.dragging = true;
+      renderer.cancelTarget();
+    }
+    if (this.dragging) {
+      // Drag left to travel right, as though pulling the world past you.
+      renderer.nudge((this.pointerLastX - e.clientX) * DRAG_GAIN);
+      this.pointerLastX = e.clientX;
+    }
+  }
+
+  private onPointerUp(e: PointerEvent, renderer: WorldRenderer): void {
+    if (this.pointerStartX === null) return;
+    if (!this.dragging && this.state.detail() < 0) renderer.pointerAt(e.clientX);
+    this.pointerStartX = null;
+    this.dragging = false;
+    if (this.canvas().nativeElement.hasPointerCapture(e.pointerId)) {
+      this.canvas().nativeElement.releasePointerCapture(e.pointerId);
+    }
   }
 }

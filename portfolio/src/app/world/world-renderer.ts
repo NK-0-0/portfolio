@@ -13,6 +13,25 @@ import {
   type WorldSnapshot,
 } from './world.model';
 
+/**
+ * Fast-travel tuning.
+ *
+ * The avatar walks at ~2.5 world-px/frame, so crossing the 3260px world takes
+ * 19 seconds — and because speed was constant, a HUD trip's duration varied 5x
+ * with distance. Travel now holds a target *duration* instead, floored at run
+ * speed so short hops don't get artificially slow.
+ */
+const TRAVEL_FRAMES = 270; // ~4.5s at 60Hz — the cap for the longest trip
+const RUN_VX = 5.04; // 3.6 run speed x the 1.4 target-seek multiplier
+/**
+ * Above this speed the avatar covers too much of its own 16px width per frame
+ * to read as running, so the view widens to compensate. Zoom is driven by
+ * actual velocity rather than trip distance, so it only engages when needed
+ * and eases off on arrival by itself.
+ */
+const ZOOM_FROM_VX = 6;
+const ZOOM_FULL_VX = 14;
+
 /** A single ambient dust/spark particle. */
 interface Particle {
   x: number;
@@ -73,11 +92,34 @@ export class WorldRenderer {
   private camX = 0;
   private w = 0;
   private h = 0;
-  /** Pixel scale: one world pixel is `px` device pixels. */
+  /**
+   * Pixel scale: one world pixel is `px` CSS pixels. Fractional while zooming.
+   * `basePx` is the resting scale for this viewport; `minPx` is the widest
+   * zoom-out fast travel is allowed to reach.
+   */
   private px = 4;
-  /** Offscreen buffer size in world pixels. */
+  private basePx = 4;
+  private minPx = 4;
+  /** Visible size in world pixels. Derived from `px`, so it grows as we zoom out. */
   private iw = 0;
   private ih = 0;
+  /**
+   * Vertical composition, as fractions of the buffer height.
+   *
+   * On a landscape screen the ground sits at 70% and the sea horizon at 52% —
+   * the original framing. In portrait that puts the walkable strip behind the
+   * bottom sheet, so both lift and the sky/sea band compresses. Everything
+   * else in the sky (sun arc, cloud band) is expressed relative to `horizonY`,
+   * so it follows automatically and landscape output is unchanged.
+   */
+  private groundY = 0.7;
+  private horizonY = 0.52;
+  /**
+   * Where the avatar sits across the view. At 0.7 a wide screen still shows
+   * ~96 world-px of road ahead; a narrow one would only show ~58, so portrait
+   * centres the avatar to restore the same lookahead.
+   */
+  private cameraBias = 0.7;
   private off: HTMLCanvasElement | undefined;
   private g!: CanvasRenderingContext2D;
   private cv: HTMLCanvasElement | undefined;
@@ -85,6 +127,10 @@ export class WorldRenderer {
 
   // --- navigation ---------------------------------------------------------
   private target: number | null = null;
+  /** Non-zero while fast-travelling: the |vx| to hold for the trip. */
+  private travelVx = 0;
+  /** 0 = resting scale, 1 = fully zoomed out to `minPx`. Lerped, never snapped. */
+  private zoom = 0;
   private wheelT = 0;
   private ping: { x: number; life: number } | null = null;
 
@@ -133,14 +179,38 @@ export class WorldRenderer {
   resize(): void {
     this.w = window.innerWidth;
     this.h = window.innerHeight;
-    this.px = this.options.pixelSize
+
+    // Derive the scale from whichever axis is tighter. Height alone (what the
+    // original did) leaves a tall, narrow phone at a desktop pixel size, which
+    // shows ~3% of the world through a keyhole with a 16%-of-screen avatar.
+    this.basePx = this.options.pixelSize
       ? clamp(Math.round(this.options.pixelSize), 2, 8)
-      : clamp(Math.round(this.h / 200), 3, 6);
+      : clamp(Math.round(Math.min(this.w / 320, this.h / 200)), 2, 6);
+
+    // Fast travel zooms out by up to 2x, floored at 2 — so a phone (basePx 2)
+    // simply doesn't zoom, which is both what it wants visually and what its
+    // fill rate can afford.
+    this.minPx = Math.max(2, Math.round(this.basePx / 2));
+
+    // Portrait: drop the ground to just above where the bottom sheet starts,
+    // so the visible band is mostly sky and sea rather than empty grass, and
+    // pull the horizon up to match. Note `pointerAt` ignores Y, so the whole
+    // visible canvas stays tappable regardless of where the ground line lands.
+    const portrait = this.h / this.w > 1.3;
+    this.groundY = portrait ? 0.52 : 0.7;
+    this.horizonY = portrait ? 0.32 : 0.52;
+    this.cameraBias = portrait ? 0.5 : 0.7;
+
+    this.px = this.basePx;
     this.iw = Math.ceil(this.w / this.px);
     this.ih = Math.ceil(this.h / this.px);
+
+    // Allocate once at the widest zoom. Zooming then only changes how much of
+    // the buffer we draw into and blit back out — no per-frame reallocation.
     if (!this.off) this.off = document.createElement('canvas');
-    this.off.width = this.iw;
-    this.off.height = this.ih;
+    this.off.width = Math.ceil(this.w / this.minPx);
+    this.off.height = Math.ceil(this.h / this.minPx);
+    this.motes = undefined;
     this.g = this.off.getContext('2d')!;
     if (this.cv) {
       this.cv.width = this.w;
@@ -154,27 +224,39 @@ export class WorldRenderer {
   private gy(wx: number): number {
     const ih = this.ih;
     return Math.round(
-      ih * 0.7 + Math.sin(wx * 0.0031) * ih * 0.03 + Math.sin(wx * 0.0011 + 1.4) * ih * 0.045,
+      ih * this.groundY +
+        Math.sin(wx * 0.0031) * ih * 0.03 +
+        Math.sin(wx * 0.0011 + 1.4) * ih * 0.045,
     );
   }
 
   // --- commands from the host --------------------------------------------
 
-  /** Walk to a world X (HUD travel, or a click on the ground). */
+  /** Walk to a world X at normal pace — a click or tap on the ground. */
   walkTo(worldX: number): void {
     this.target = clamp(worldX, 60, WORLD - 60);
+    this.travelVx = 0;
     this.acting = null;
   }
 
-  /** Walk to a chapter by index. */
+  /**
+   * Fast-travel to a chapter from the HUD.
+   *
+   * Speed is chosen so the trip lands in `TRAVEL_FRAMES`, but never below run
+   * speed — so nearby stops stay quick rather than crawling to fill the time.
+   */
   travelTo(chapter: number): void {
-    this.target = CH[chapter].x;
+    const destination = CH[chapter].x;
+    const distance = Math.abs(destination - this.ax);
+    this.target = destination;
+    this.travelVx = Math.max(RUN_VX, distance / TRAVEL_FRAMES);
     this.acting = null;
   }
 
   /** Cancel any pending auto-walk, e.g. because the user took manual control. */
   cancelTarget(): void {
     this.target = null;
+    this.travelVx = 0;
   }
 
   /** Toggle the "press E" interaction at the current stop. */
@@ -276,13 +358,19 @@ export class WorldRenderer {
     const detailOpen = this.detail >= 0;
 
     let dir = 0;
+    let seekVx = 0;
     if (!detailOpen) {
       if (this.input.right) dir += 1;
       if (this.input.left) dir -= 1;
       if (!dir && this.target !== null) {
         const d = this.target - this.ax;
-        if (Math.abs(d) < 8) this.target = null;
-        else dir = Math.sign(d) * 1.4;
+        if (Math.abs(d) < 8) {
+          this.target = null;
+          this.travelVx = 0;
+        } else {
+          dir = Math.sign(d) * 1.4;
+          if (this.travelVx) seekVx = Math.sign(d) * this.travelVx;
+        }
       }
     }
     if (dir !== 0 || detailOpen) this.acting = null;
@@ -291,7 +379,8 @@ export class WorldRenderer {
     }
     this.actT = this.acting !== null ? this.actT + 1 / 60 : 0;
     const spd = (this.input.run ? 3.6 : 1.8) * (this.options.walkSpeed ?? 1);
-    this.vx += (dir * spd - this.vx) * 0.18;
+    const wantVx = seekVx || dir * spd;
+    this.vx += (wantVx - this.vx) * 0.18;
     if (this.wheelT > 0) this.wheelT--;
     this.ax = clamp(this.ax + this.vx, 60, WORLD - 60);
     if (Math.abs(this.vx) > 0.12) {
@@ -306,10 +395,13 @@ export class WorldRenderer {
       if (this.ping.life <= 0) this.ping = null;
     }
     this.dogTick();
+    this.zoomTick();
 
     const ph = clamp(this.ax / WORLD, 0, 1);
     const night = clamp((ph - 0.74) / 0.26, 0, 1);
-    this.camX = Math.round(clamp(this.ax - this.iw * 0.7, 0, Math.max(0, WORLD - this.iw)));
+    this.camX = Math.round(
+      clamp(this.ax - this.iw * this.cameraBias, 0, Math.max(0, WORLD - this.iw)),
+    );
 
     const prevAx = this.prevAx === undefined ? this.ax : this.prevAx;
     this.prevAx = this.ax;
@@ -321,6 +413,25 @@ export class WorldRenderer {
     });
 
     this.paint(ph, night);
+  }
+
+  /**
+   * Ease the view out while travelling fast, and back in on arrival.
+   *
+   * Widening the frame is what makes a 10px/frame sprint legible instead of
+   * looking like a teleport: the avatar covers the same world distance but a
+   * far smaller fraction of the screen. It also shows the stretch of coast the
+   * visitor is skipping, which turns the dead time into the scenic part.
+   */
+  private zoomTick(): void {
+    const want = clamp((Math.abs(this.vx) - ZOOM_FROM_VX) / (ZOOM_FULL_VX - ZOOM_FROM_VX), 0, 1);
+    // Pull out faster than we settle back, so arrival feels like coming to rest.
+    this.zoom += (want - this.zoom) * (want > this.zoom ? 0.05 : 0.03);
+    if (Math.abs(this.zoom - want) < 0.002) this.zoom = want;
+
+    this.px = this.basePx + (this.minPx - this.basePx) * this.zoom;
+    this.iw = Math.min(Math.ceil(this.w / this.px), this.off!.width);
+    this.ih = Math.min(Math.ceil(this.h / this.px), this.off!.height);
   }
 
   /**
@@ -388,7 +499,7 @@ export class WorldRenderer {
 
   private paint(ph: number, night: number): void {
     const g = this.g, iw = this.iw, ih = this.ih, C = pal(ph), cam = this.camX;
-    const hor = Math.round(ih * 0.52);
+    const hor = Math.round(ih * this.horizonY);
 
     for (let y = 0; y < hor; y++) { g.fillStyle = mix(C.skyTop, C.skyBot, y / hor); g.fillRect(0, y, iw, 1); }
 
@@ -400,7 +511,7 @@ export class WorldRenderer {
       g.globalAlpha = 1;
     }
 
-    const sunX = Math.round(iw * 0.74 - ph * iw * 0.52), sunY = Math.round(ih * 0.14 + ph * ih * 0.34);
+    const sunX = Math.round(iw * 0.74 - ph * iw * 0.52), sunY = Math.round(hor * (0.27 + ph * 0.65));
     g.fillStyle = night > 0.55 ? '#e8eeff' : C.sun;
     g.globalAlpha = 0.28; g.beginPath(); g.arc(sunX, sunY, 13, 0, 6.284); g.fill();
     g.globalAlpha = 1; g.beginPath(); g.arc(sunX, sunY, night > 0.55 ? 5 : 7, 0, 6.284); g.fill();
@@ -409,7 +520,7 @@ export class WorldRenderer {
     g.fillStyle = C.cloud; g.globalAlpha = 0.85;
     for (let i = 0; i < 7; i++) {
       const cx = ((hash(i) * 2400 - cam * 0.22) % (iw + 90)) - 45;
-      const cy = ih * 0.1 + hash(i + 7) * ih * 0.22;
+      const cy = hor * (0.19 + hash(i + 7) * 0.42);
       const s = 5 + hash(i + 21) * 6;
       g.beginPath(); g.arc(cx, cy, s, 0, 6.284); g.arc(cx + s * 0.9, cy + 1, s * 0.75, 0, 6.284); g.arc(cx - s * 0.9, cy + 2, s * 0.6, 0, 6.284); g.fill();
     }
@@ -826,10 +937,16 @@ export class WorldRenderer {
 
   private ambient(g: CanvasRenderingContext2D, night: number): void {
     const iw = this.iw, ih = this.ih;
-    if (!this.motes) this.motes = Array.from({ length: 26 }, () => ({ x: Math.random() * iw, y: ih * 0.4 + Math.random() * ih * 0.55, s: 0.2 + Math.random() * 0.5, ph: Math.random() * 6.3 }));
+    // Seed against the buffer, not the visible region: `iw`/`ih` shrink and
+    // grow with the travel zoom, and motes sown at the resting size would all
+    // bunch into the left of frame the moment the view widened.
+    if (!this.motes) {
+      const bw = this.off!.width, bh = this.off!.height;
+      this.motes = Array.from({ length: 26 }, () => ({ x: Math.random() * bw, y: bh * 0.4 + Math.random() * bh * 0.55, s: 0.2 + Math.random() * 0.5, ph: Math.random() * 6.3 }));
+    }
     for (const m of this.motes) {
       const x = (m.x + this.t * m.s * 6) % iw;
-      const y = m.y + Math.sin(this.t * m.s + m.ph) * 4;
+      const y = (m.y % ih) + Math.sin(this.t * m.s + m.ph) * 4;
       if (night > 0.2) {
         const bl = 0.3 + 0.7 * Math.pow(Math.max(0, Math.sin(this.t * 1.3 + m.ph)), 3);
         g.globalAlpha = night * bl;

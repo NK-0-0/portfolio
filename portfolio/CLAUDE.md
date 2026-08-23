@@ -48,6 +48,27 @@ buffer (`iw × ih`, roughly viewport ÷ `px`), which is then blitted up to the v
 `imageSmoothingEnabled = false`. Per-frame fill cost is therefore independent of display resolution
 — a 4K screen costs the same as a 1080p one.
 
+`px` comes from the **tighter viewport axis** (`min(w/320, h/200)`), not height alone — height alone
+leaves a tall narrow phone at desktop scale, showing ~3% of the world. The buffer is allocated once
+at `minPx` (the widest zoom fast travel can reach), so zooming only changes how much of it is drawn
+and blitted. **Never reallocate the canvas per frame.**
+
+### Responsive composition
+
+Portrait (`h/w > 1.3`) shifts three values in `resize()`: `groundY`, `horizonY` and `cameraBias`.
+Everything in the sky is expressed relative to `horizonY`, so the sun arc and cloud band follow
+automatically and landscape output stays bit-identical. If you add scenery with a hardcoded
+`ih * <fraction>` for a vertical position, express it against `horizonY` or `groundY` instead.
+
+Below 720px CSS width, panels dock as bottom sheets (`--sheet-max`). The ground line is deliberately
+placed to clear them — if you change one, check the other.
+
+### Fast travel
+
+`travelTo()` picks a speed to land the trip in `TRAVEL_FRAMES`, floored at run speed. `zoomTick()`
+widens the view based on actual `|vx|`, not trip distance, so it engages only when the avatar is
+genuinely outrunning legibility and eases off on arrival by itself. Ordinary walking never zooms.
+
 ### Change detection
 
 The app is **zoneless** (`provideZonelessChangeDetection`). The rAF loop calls
@@ -157,8 +178,12 @@ keyframe, and that no two chapters have overlapping interaction radii.
 (`playwright.config.local.ts`) and asserts on the DOM overlay plus one canvas pixel sample.
 `e2e/portfolio.spec.ts` — if reinstated — runs against the deployed site.
 
-Note: the avatar physically **walks** to a HUD destination rather than cutting to it, so a
-cross-world trip takes ~19 seconds of wall clock. E2E timeouts are sized for the walk.
+Note: the avatar physically **travels** to a HUD destination rather than cutting to it. Trips are
+capped at ~4.5s, but E2E timeouts are still sized generously for the walk.
+
+The `narrow viewport` describe block in `e2e/local-build.spec.ts` uses `test.use({ viewport })` to
+cover the mobile layout in the same run. Add mobile coverage there rather than as a Playwright
+project, so the desktop tests don't get run at phone size.
 
 ---
 

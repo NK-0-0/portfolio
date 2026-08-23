@@ -249,3 +249,65 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/**
+ * Narrow viewports: panels become bottom sheets.
+ *
+ * The side-panel layout is built on `vw` widths that collapse to ~148px on a
+ * phone. Below this breakpoint each panel instead docks to the bottom edge and
+ * caps its height, so the world — and the avatar you are steering — stays
+ * visible above it. `--sheet-max` is the contract the HUD reads to keep its own
+ * chrome clear of the sheet.
+ */
+@media (max-width: 720px) {
+  :root {
+    --sheet-max: 44vh;
+  }
+
+  .panel {
+    padding: 18px 18px 22px;
+
+    h1,
+    h2 {
+      margin: 10px 0;
+    }
+
+    p {
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+  }
+
+  .panel--side,
+  .panel--rail {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    max-height: var(--sheet-max);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-width: 1px 0 0;
+    border-radius: 0;
+    transform: translateY(100%);
+
+    &.is-open {
+      transform: translateY(0);
+    }
+  }
+
+  /* The rail panel is normally chrome-less — as a sheet it needs the surface. */
+  .panel--rail {
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 0 18px;
+    border-top: 1px solid var(--hairline);
+    background: linear-gradient(180deg, var(--surface-top), var(--surface-bot));
+    backdrop-filter: var(--blur);
+  }
+
+  .btn {
+    padding: 14px 18px; /* 44px minimum touch target */
+  }
+}

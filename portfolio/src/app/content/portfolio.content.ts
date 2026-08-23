@@ -221,11 +221,17 @@ export const CAMPFIRE = {
   footnote: "Press E by the fire, stay a while, and he'll doze off.",
 };
 
-/** Bottom-left controls legend. */
-export const CONTROLS = [
-  'E — INTERACT · CLICK GROUND — WALK THERE · CLICK HIM — HE WAVES · CLICK THE DOG',
-  '← → WALK · SHIFT RUN · ESC CLOSE',
-];
+/**
+ * Controls legend. Both variants render; CSS shows whichever suits the
+ * viewport, so no JS has to guess at the input device.
+ */
+export const CONTROLS = {
+  keyboard: [
+    'E — INTERACT · CLICK GROUND — WALK THERE · CLICK HIM — HE WAVES · CLICK THE DOG',
+    '← → WALK · SHIFT RUN · ESC CLOSE',
+  ],
+  touch: ['TAP THE GROUND TO WALK · DRAG TO SCRUB', 'TAP HIM, THE DOG, OR THE PROMPT'],
+};
 
 /** Time-of-day label shown in the header, driven by walk phase. */
 export function clockLabel(phase: number): string {
