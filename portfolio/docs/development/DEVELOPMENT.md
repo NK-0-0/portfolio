@@ -32,6 +32,7 @@ npx ng test --no-watch   # Vitest, single run
 npm test                 # Vitest, watch mode
 npm run e2e:local        # builds prod, serves it, runs Playwright against it
 npm run perf:fps         # frame-timing gate
+npm run lighthouse       # production build + Lighthouse CI
 ```
 
 Before opening a PR, `npm run lint && npm run typecheck && npx ng test --no-watch` mirrors what CI
@@ -90,12 +91,14 @@ four.
 **Build fails with `window is not defined` / `document is not defined`**
 Something browser-only ran during prerender. Move it into `afterNextRender`.
 
-**`npx lhci autorun` does nothing**
-That resolves to an unrelated squatted package. Always use `npx @lhci/cli autorun`.
-
 **Lighthouse says "Chrome installation not found"**
-No system Chrome. Point it at the Playwright-bundled binary — see
-[`../agent-notes/angular-dev.md`](../agent-notes/angular-dev.md).
+No system Chrome on this machine. Point it at the Playwright-bundled binary — see
+[`../agent-notes/angular-dev.md`](../agent-notes/angular-dev.md). CI runners have Chrome, so this
+is a local-only step.
+
+**`npx lhci` does nothing, from a different directory**
+`@lhci/cli` is a devDependency of `portfolio/`, so `npx lhci` only resolves to the real binary from
+inside that directory. Elsewhere npm fetches an unrelated squatted package that silently no-ops.
 
 **WebKit won't launch locally**
 Missing system libraries that need `sudo apt` / `playwright install --with-deps`. Run

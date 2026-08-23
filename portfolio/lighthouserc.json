@@ -2,7 +2,10 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist/portfolio/browser",
-      "numberOfRuns": 1
+      "numberOfRuns": 1,
+      "settings": {
+        "chromeFlags": "--no-sandbox --headless=new"
+      }
     },
     "assert": {
       "assertions": {

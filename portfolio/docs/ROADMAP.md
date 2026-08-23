@@ -43,8 +43,25 @@ None of this is a code change; it is all `src/app/content/portfolio.content.ts`.
       canvas is `aria-hidden`, so nothing is *lost* — but the world itself conveys mood, not
       information. Worth confirming that is the intent.
 
+## Open — reach
+
+- [x] **Link-unfurl metadata** — done 2026-08-23. Open Graph + Twitter card tags with absolute URLs
+      and `public/preview.png`, since the client-only build gives unfurlers nothing else to read.
+- [ ] **No crawlable content without JS.** The build emits an empty `<app-root>`. Options: enable
+      real prerendering (`@angular/ssr` + server entry — but that re-adds a dependency the project
+      dropped on purpose), or add a plain document view of the same content.
+- [ ] **No skim path.** Content is revealed by walking, which is the point, but a recruiter who
+      wants the facts in ten seconds has no route to them. A `/read` view generated from
+      `portfolio.content.ts` would also serve as the no-JS and print/PDF surface. Decision pending.
+
 ## Open — infrastructure
 
+- [x] **Lighthouse CI was failing on every PR** — fixed 2026-08-23. Two bugs: the treosh action
+      resolved `staticDistDir` against the repo root rather than `portfolio/`, and the job built
+      with `--base-href /portfolio/` while LHCI serves from root, which would have graded a blank
+      page. Now runs `@lhci/cli` directly (pinned devDependency) with `working-directory: portfolio`.
+      Note it had never passed — it only triggers on `pull_request`, and all prior work was pushed
+      straight to `main`.
 - [ ] `e2e/perf/baseline.json` does not exist yet. First CI run of `npm run perf:fps` writes it.
       Do not commit a locally captured baseline — this sandbox and CI both software-render.
 - [ ] WebKit cannot launch locally in this sandbox (missing system libs); CI covers it.

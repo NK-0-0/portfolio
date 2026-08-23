@@ -10,7 +10,8 @@
     "e2e:local": "playwright test --config=playwright.config.local.ts",
     "perf:fps": "ng build --configuration production && node scripts/measure-fps.mjs",
     "lint": "ng lint",
-    "typecheck": "tsc -p tsconfig.app.json --noEmit"
+    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "lighthouse": "ng build --configuration production && lhci autorun"
   },
   "private": true,
   "packageManager": "npm@11.9.0",
@@ -30,6 +31,7 @@
     "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.0",
     "@eslint/js": "^10.0.1",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.60.0",
     "@types/node": "^20.17.19",
     "angular-eslint": "21.4.0",

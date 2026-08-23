@@ -91,11 +91,13 @@ npm run lint
 npx ng test --no-watch                      # Vitest, single run
 npm run e2e:local                           # Playwright against a local prod build
 npm run perf:fps                            # frame-timing regression gate
+npm run lighthouse                          # production build + Lighthouse CI
 ```
 
-Lighthouse CI (`npx @lhci/cli autorun`) needs a Chrome binary — see
-`docs/agent-notes/angular-dev.md` for the sandbox workaround. Always use `@lhci/cli` explicitly;
-bare `npx lhci` resolves to an unrelated squatted package that silently no-ops.
+`@lhci/cli` is a pinned devDependency, so `npx lhci` resolves to the local binary — historically
+this project used a bare `npx lhci`, which fetches an unrelated squatted package that silently
+no-ops. Never run it from outside `portfolio/`. Chrome flags live in `lighthouserc.json`; a machine
+with no system Chrome also needs `CHROME_PATH` (see `docs/agent-notes/angular-dev.md`).
 
 ---
 

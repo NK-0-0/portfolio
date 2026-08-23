@@ -22,13 +22,28 @@ jobs:
         working-directory: portfolio
         run: npm ci
 
+      # No --base-href here, deliberately. LHCI serves `staticDistDir` from the
+      # root of a throwaway server, so a `/portfolio/` base href would make every
+      # asset 404 and Lighthouse would grade a blank page. The deploy workflow
+      # still builds with the base href it actually ships under.
       - name: Build production
         working-directory: portfolio
-        run: npx ng build --configuration production --base-href /portfolio/
+        run: npx ng build --configuration production
 
+      # Run the CLI directly rather than via treosh/lighthouse-ci-action: the
+      # action resolves `staticDistDir` against the repo root, but the app (and
+      # its dist) live in portfolio/, so the relative path in lighthouserc.json
+      # never resolved. Running it here with working-directory matches how the
+      # same config is used locally.
       - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v12
+        working-directory: portfolio
+        run: npx @lhci/cli autorun
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          configPath: ./portfolio/lighthouserc.json
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+          name: lighthouse-results
+          path: portfolio/.lighthouseci/
+          if-no-files-found: ignore
+          retention-days: 7
