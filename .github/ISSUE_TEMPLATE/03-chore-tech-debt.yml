@@ -1,0 +1,47 @@
+name: Chore / Tech Debt
+description: Cleanup, dependency/tooling, documentation, asset/IP, or CI-CD work
+labels: [tech-debt]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Code cleanup
+        - Dependency & tooling
+        - Documentation
+        - Asset & IP cleanup
+        - CI-CD
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: What needs cleaning up or maintaining, and why now?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] Concrete, checkable outcome
+        - [ ] How "done" is verified (build passes, grep clean, etc.)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated effort
+      options:
+        - Small (< 2 hours)
+        - Medium (half day)
+        - Large (1+ days)
+        - Unknown
+    validations:
+      required: true

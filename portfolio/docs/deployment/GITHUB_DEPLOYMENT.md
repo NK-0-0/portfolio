@@ -203,40 +203,15 @@ If you own a domain (e.g., `nkateko.dev`):
 
 ---
 
-## Part 6: Handling Large Assets (GLB Model)
+## Part 6: Handling Large Assets
 
-GLB files (the 3D model) can be up to 3MB. GitHub Pages has no file size limit under 100MB, so this is fine. However, there are two things to watch:
+The site ships **no binary assets** — the pixel art is character data in TypeScript, fonts come from
+Google Fonts, and technology icons are hot-linked from the Devicon CDN. There is nothing here to put
+behind Git LFS or a release attachment.
 
-### Git LFS (recommended for models > 1MB)
-
-Large binary files in Git cause bloated repository history. Use Git LFS:
-
-```bash
-# Install Git LFS (once per machine)
-git lfs install
-
-# Track GLB files
-git lfs track "*.glb"
-git lfs track "*.hdr"
-git lfs track "*.ktx2"
-
-# Commit the .gitattributes file
-git add .gitattributes
-git commit -m "chore: track binary assets with Git LFS"
-```
-
-> **GitHub Pages and Git LFS:** GitHub Pages **does not serve Git LFS objects** by default. If you use LFS, place large assets in `public/` and reference them by URL, or use a CDN (Cloudflare R2, Bunny CDN, or even a separate GitHub release asset URL).
-
-### Alternative: Store model in GitHub Releases
-
-Upload `kakashi.glb` as a release asset (no LFS needed) and reference it by its raw GitHub release URL in your Angular code. This keeps the repo lean.
-
-```typescript
-readonly modelUrl = 'https://github.com/<user>/portfolio/releases/download/v1.0/kakashi.glb';
-```
-
----
-
+If that ever changes (project screenshots in `public/projects/`, say), note that GitHub Pages has no
+per-file size limit under 100MB, so ordinary committed files are fine. Reach for LFS or release
+assets only if the repo itself starts getting heavy.
 ## Part 7: Local Preview of Production Build
 
 Always test the production build locally before pushing:
@@ -267,7 +242,6 @@ npx http-server dist/portfolio/browser -p 4200 --proxy http://localhost:4200?
 - [ ] `public/404.html` added
 - [ ] `.github/workflows/deploy.yml` created with correct `base-href`
 - [ ] GitHub Pages source set to "GitHub Actions" in repo settings
-- [ ] Large assets (GLB, HDR) handled via LFS or release assets
 - [ ] Production build tested locally before push
 - [ ] `--base-href` matches actual repo name (or `/` for custom domain)
-- [ ] Footer IP attribution present for Kakashi character
+- [ ] Footer copy is correct for whatever is actually shipping — as of Milestone 1 the footer is a plain copyright line (no third-party attribution, since all live 3D props are original procedural geometry; see `docs/ASSET_CREDITS.md`). If a mandatory-attribution asset is ever added, restore an `docs/ASSET_CREDITS.md`-sourced notice and update this item

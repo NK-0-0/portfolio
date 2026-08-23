@@ -6,6 +6,18 @@
 /out-tsc
 /bazel-out
 
+# Local pre-deploy Playwright suite artifacts (playwright.config.local.ts).
+# The prod suite's e2e/screenshots/*.png ARE tracked; these local ones are not.
+/test-results/local
+/e2e/screenshots/local
+
+# Scratch/staging area for raw, unoptimized sourced assets — never commit.
+# Only optimized output that lands in public/models/ gets committed.
+/assets-staging
+
+# Lighthouse CI report output (npx @lhci/cli autorun) — regenerated each run.
+/.lighthouseci
+
 # Node
 /node_modules
 npm-debug.log

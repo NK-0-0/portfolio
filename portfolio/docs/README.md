@@ -1,80 +1,26 @@
 # docs — Documentation Index
 
-All documentation for the Signal Ghost portfolio project (relaunch of the original Kakashi/Naruto fan-art concept — see `ROADMAP.md` for why).
+Documentation for the pixel-world portfolio.
+
+Start with [`../CLAUDE.md`](../CLAUDE.md) — it is the terse day-to-day source of truth for
+architecture and conventions, and takes precedence if anything here ever drifts.
 
 ---
-
-## Root
 
 | File | Contents |
-|------|----------|
-| [ROADMAP.md](ROADMAP.md) | Diagnosis of why the original build stalled, plus the milestone/issue breakdown for the relaunch. Read this first if you're wondering "what happened here" or "what's next." |
+|---|---|
+| [ROADMAP.md](ROADMAP.md) | Where the project stands and what is still open |
+| [ASSET_CREDITS.md](ASSET_CREDITS.md) | Provenance and licensing for every third-party asset |
+| [development/DEVELOPMENT.md](development/DEVELOPMENT.md) | Local setup, commands, and the dev loop |
+| [development/AGENTS.md](development/AGENTS.md) | How the repo's Claude Code subagents divide work |
+| [agent-notes/angular-dev.md](agent-notes/angular-dev.md) | Hard-won environment gotchas, appended as they're hit |
+| [deployment/GITHUB_DEPLOYMENT.md](deployment/GITHUB_DEPLOYMENT.md) | How the Pages deploy works |
+| [deployment/GITHUB_INSTRUCTIONS.md](deployment/GITHUB_INSTRUCTIONS.md) | Repo, branch and CI setup reference |
+| `media/` | Screenshots used by the README |
 
----
+## Removed
 
-## vision/
-> *What we're building and why*
-
-| File | Contents |
-|------|----------|
-| [VISION.md](vision/VISION.md) | Current concept ("Signal Ghost" original sci-fi theme), palette, materials/lighting, typography, per-section scroll beat sheet, 3D prop concepts, motion/performance guardrails, IP posture |
-
----
-
-## architecture/
-> *How it's built*
-
-| File | Contents |
-|------|----------|
-| [ARCHITECTURE.md](architecture/ARCHITECTURE.md) | Current tech stack decisions (angular-three, Three.js, signals), live folder structure, state management, interaction flow, mobile fallback pattern |
-| [SKILLS_REFERENCE.md](architecture/SKILLS_REFERENCE.md) | Every library with install commands, key API snippets, dev tools, browser support targets |
-
----
-
-## archive/
-> *Superseded designs, kept for historical record only*
-
-| File | Contents |
-|------|----------|
-| [LEGACY_VISION.md](archive/LEGACY_VISION.md) | The original Kakashi hover/hotspot concept — abandoned mid-build, do not implement |
-| [LEGACY_ARCHITECTURE.md](archive/LEGACY_ARCHITECTURE.md) | The original architecture doc for that abandoned design, including a wrong package name |
-
----
-
-## development/
-> *How to work on it*
-
-| File | Contents |
-|------|----------|
-| [DEVELOPMENT.md](development/DEVELOPMENT.md) | Local setup, Phase 1–7 build order, code conventions, debugging, common issues and fixes |
-| [ASSET_PIPELINE.md](development/ASSET_PIPELINE.md) | Sourcing the Kakashi GLB from Sketchfab, gltf-transform optimisation (Draco + KTX2), file size budgets |
-| [AGENTS.md](development/AGENTS.md) | Cross-tool AI assistant instructions (Cursor, Copilot, etc.) — links back to CLAUDE.md |
-
----
-
-## deployment/
-> *How to ship it*
-
-| File | Contents |
-|------|----------|
-| [GITHUB_DEPLOYMENT.md](deployment/GITHUB_DEPLOYMENT.md) | SSR → static migration, angular.json changes, GitHub Pages setup, custom domain, 404 routing |
-| [GITHUB_INSTRUCTIONS.md](deployment/GITHUB_INSTRUCTIONS.md) | Branch strategy, commit conventions, GitHub Actions workflows (deploy + Lighthouse CI), issue templates, PR template |
-
----
-
-## Quick links by role
-
-**Starting the project for the first time:**
-1. [ROADMAP.md](ROADMAP.md) — understand what happened and what's next
-2. [VISION.md](vision/VISION.md) — understand the concept
-3. [ARCHITECTURE.md](architecture/ARCHITECTURE.md) — understand the stack
-4. [DEVELOPMENT.md](development/DEVELOPMENT.md) — set up locally
-
-**Working on the 3D scene:**
-→ [ARCHITECTURE.md](architecture/ARCHITECTURE.md) + [SKILLS_REFERENCE.md](architecture/SKILLS_REFERENCE.md) + [ASSET_PIPELINE.md](development/ASSET_PIPELINE.md)
-
-**Deploying:**
-→ [GITHUB_DEPLOYMENT.md](deployment/GITHUB_DEPLOYMENT.md) → [GITHUB_INSTRUCTIONS.md](deployment/GITHUB_INSTRUCTIONS.md)
-
-**AI coding assistant (Claude Code):**
-→ Read `CLAUDE.md` at the project root — it's the primary AI instruction file and is loaded automatically.
+`vision/`, `architecture/` and `archive/` documented the previous Three.js scroll-driven portfolio
+("Signal Ghost") and were deleted in the August 2026 pixel-world port, along with the app they
+described. `development/ASSET_PIPELINE.md` covered the GLB optimisation pipeline; the site now
+ships no binary assets at all. Git history has them if you need the record.

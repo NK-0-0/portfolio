@@ -1,0 +1,49 @@
+name: E2E & Performance
+
+# Cross-browser smoke matrix + frame-timing regression gate
+# (ROADMAP Milestone 4, issue 4.7 / REQUIREMENTS NFR-9). Kept separate from the
+# fast ci.yml lint/test/build job and lighthouse.yml: a 3-engine Playwright run
+# plus a perf script is slower and more failure-prone, so it gets its own gate.
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'portfolio/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: portfolio
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: portfolio
+        run: npx playwright install --with-deps chromium webkit firefox
+
+      - name: Cross-browser smoke suite (Chromium, WebKit, Firefox)
+        working-directory: portfolio
+        run: npm run e2e:local
+
+      - name: Frame-timing regression gate
+        working-directory: portfolio
+        run: npm run perf:fps
+
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            portfolio/test-results/
+            portfolio/e2e/screenshots/local/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,0 +1,169 @@
+.caption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 14px;
+  background: rgb(10 22 24 / 0.6);
+}
+
+.caption .eyebrow {
+  letter-spacing: 0.22em;
+}
+
+.caption .meta {
+  letter-spacing: 0.12em;
+  color: rgb(255 250 240 / 0.5);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(1120px, 94vw);
+}
+
+.nudge {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgb(255 250 240 / 0.24);
+  border-radius: var(--radius-sm);
+  background: rgb(10 22 24 / 0.6);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: rgb(255 250 240 / 0.85);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.rail {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 4px 2px 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  list-style: none;
+
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  width: 246px;
+  padding: 16px 18px 18px;
+  border: 1px solid rgb(255 250 240 / 0.2);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgb(10 22 24 / 0.82), rgb(8 18 22 / 0.74));
+  backdrop-filter: var(--blur);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+  }
+
+  &--empty {
+    justify-content: center;
+    gap: 9px;
+    border-style: dashed;
+    border-color: rgb(255 250 240 / 0.3);
+    background: rgb(10 22 24 / 0.45);
+    backdrop-filter: blur(8px);
+    cursor: default;
+
+    &:hover {
+      transform: none;
+      border-color: rgb(255 250 240 / 0.3);
+    }
+  }
+}
+
+/* The first real project is the featured one. */
+.rail > li:first-child .card {
+  border-color: var(--accent-line);
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.card__kind {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+
+  &--web {
+    color: var(--accent-cool);
+  }
+
+  &--muted {
+    color: var(--ink-faint);
+  }
+}
+
+.card__year {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: rgb(255 250 240 / 0.4);
+}
+
+.card__title {
+  margin-bottom: 5px;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 23px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.card__stack {
+  margin-bottom: 10px;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: rgb(255 250 240 / 0.5);
+}
+
+.card__blurb {
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgb(255 250 240 / 0.78);
+}
+
+.card--empty .card__blurb {
+  margin-bottom: 0;
+  color: var(--ink-mute);
+}
+
+.card__cta {
+  margin-top: auto;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--accent-warm);
+}

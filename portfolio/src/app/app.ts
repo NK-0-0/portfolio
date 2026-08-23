@@ -1,37 +1,51 @@
-import { Component, inject } from '@angular/core';
-import { DeviceCapabilityService } from './core/services/device-capability';
-import { SceneComponent } from './three/scene/scene.component';
-import { FallbackComponent } from './ui/fallback/fallback.component';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { CampfirePanelComponent } from './ui/panels/campfire-panel.component';
+import { HillPanelComponent } from './ui/panels/hill-panel.component';
+import { JettyPanelComponent } from './ui/panels/jetty-panel.component';
+import { ToolbeltPanelComponent } from './ui/panels/toolbelt-panel.component';
+import { TrailPanelComponent } from './ui/panels/trail-panel.component';
+import { WorksPanelComponent } from './ui/panels/works-panel.component';
+import { ProjectDetailComponent } from './ui/project-detail/project-detail.component';
+import { WorldHudComponent } from './ui/hud/world-hud.component';
+import { PixelWorldComponent } from './world/pixel-world.component';
+import { WorldStateService } from './world/world-state.service';
 
 /**
- * Root component. Switches between the 3D experience (SceneComponent)
- * and the 2D fallback (FallbackComponent) based on device capability.
+ * Root layout: the canvas world underneath, the DOM overlay on top.
  *
- * Both branches live in @defer blocks so Angular's build system splits
- * them into separate lazy chunks. Three.js (~600kB) only downloads
- * when the browser can actually render WebGL.
+ * Panel visibility comes from a single `activePanel` signal — walking east
+ * changes which index is nearest, and each panel fades itself in via CSS.
  */
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [SceneComponent, FallbackComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PixelWorldComponent,
+    WorldHudComponent,
+    HillPanelComponent,
+    WorksPanelComponent,
+    ToolbeltPanelComponent,
+    TrailPanelComponent,
+    JettyPanelComponent,
+    CampfirePanelComponent,
+    ProjectDetailComponent,
+  ],
   template: `
-    @if (capability.is3DSupported()) {
-      @defer (on immediate) {
-        <app-scene />
-      } @loading {
-        <div class="bootstrap-loading" aria-hidden="true"></div>
-      }
-    } @else {
-      @defer (on immediate) {
-        <app-fallback />
-      } @loading {
-        <div class="bootstrap-loading" aria-hidden="true"></div>
-      }
-    }
+    <app-pixel-world />
+
+    <app-hill-panel [open]="active() === 0" />
+    <app-works-panel [open]="active() === 1" />
+    <app-toolbelt-panel [open]="active() === 2" />
+    <app-trail-panel [open]="active() === 3" />
+    <app-jetty-panel [open]="active() === 4" />
+    <app-campfire-panel [open]="active() === 5" />
+
+    <app-world-hud />
+    <app-project-detail />
   `,
   styleUrl: './app.scss',
 })
 export class App {
-  protected readonly capability = inject(DeviceCapabilityService);
+  private readonly state = inject(WorldStateService);
+  protected readonly active = this.state.activePanel;
 }

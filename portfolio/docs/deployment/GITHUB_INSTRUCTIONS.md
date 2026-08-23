@@ -28,7 +28,7 @@ portfolio/                        ← repo root
 | Branch | Purpose | Protection |
 |--------|---------|-----------|
 | `main` | Production — always deployable | Force-push disabled, deletion blocked |
-| `feat/<name>` | New features (e.g., `feat/kakashi-model`) | None |
+| `feat/<name>` | New features (e.g., `feat/campfire-panel`) | None |
 | `fix/<name>` | Bug fixes | None |
 | `chore/<name>` | Tooling, deps, CI changes | None |
 
@@ -71,10 +71,10 @@ Follow **Conventional Commits** (https://conventionalcommits.org):
 
 **Examples:**
 ```
-feat(kakashi): add raycasting hotspot directive
-fix(panel): prevent flicker on quick hover-out
-perf(scene): lazy-load Three.js chunk on first user interaction
-chore(deps): upgrade angular-three to v4.1.0
+feat(world): add the campfire chapter
+fix(drone): prevent flicker on section change
+perf(world): skip offscreen scenery when the camera has not moved
+chore(deps): upgrade @angular/core to v21.2.15
 docs(vision): update section mapping table
 ```
 
@@ -199,7 +199,7 @@ jobs:
           temporaryPublicStorage: true    # Posts a URL to the PR with results
 ```
 
-**`portfolio/lighthouserc.json`:**
+**`portfolio/lighthouserc.json`** (this is the actual current file, verified 2026-07-05 — it also has a `seo` assertion that a previous version of this doc omitted):
 ```json
 {
   "ci": {
@@ -211,14 +211,15 @@ jobs:
       "assertions": {
         "categories:performance":    ["warn",  { "minScore": 0.75 }],
         "categories:accessibility":  ["error", { "minScore": 0.90 }],
-        "categories:best-practices": ["warn",  { "minScore": 0.85 }]
+        "categories:best-practices": ["warn",  { "minScore": 0.85 }],
+        "categories:seo":            ["warn",  { "minScore": 0.80 }]
       }
     }
   }
 }
 ```
 
-> **Note on performance score:** A 3D WebGL portfolio will score lower than a standard site on Lighthouse performance (large JS chunk, WebGL initialization). Set `minScore: 0.75` initially and tighten as you optimise. Accessibility must be 0.90+ — the 2D fallback makes this achievable.
+> **Note on performance score:** A 3D WebGL portfolio will score lower than a standard site on Lighthouse performance (large JS chunk, WebGL initialization). `minScore: 0.75` is a `warn`, not `error`, for exactly this reason — tighten it once optimized. Accessibility is the only `error`-level gate (0.90+) — the 2D fallback makes this achievable.
 
 ---
 
@@ -386,11 +387,11 @@ Add secrets at: **Settings → Secrets and variables → Actions → New reposit
 When the portfolio reaches a milestone worth marking:
 
 ```bash
-git tag -a v1.0.0 -m "Initial launch — Kakashi scene complete"
+git tag -a v1.0.0 -m "Initial launch — 3D scene complete"
 git push origin v1.0.0
 ```
 
-Then use the GitHub Releases page to attach the optimised `kakashi.glb` as a release asset (keeps large binaries out of the main git history).
+The site ships no binary assets, so releases carry source only — there is nothing to attach.
 
 ---
 
