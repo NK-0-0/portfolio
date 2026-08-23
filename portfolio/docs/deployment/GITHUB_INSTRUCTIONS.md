@@ -28,7 +28,7 @@ portfolio/                        ← repo root
 | Branch | Purpose | Protection |
 |--------|---------|-----------|
 | `main` | Production — always deployable | Force-push disabled, deletion blocked |
-| `feat/<name>` | New features (e.g., `feat/hud-core-prop`) | None |
+| `feat/<name>` | New features (e.g., `feat/campfire-panel`) | None |
 | `fix/<name>` | Bug fixes | None |
 | `chore/<name>` | Tooling, deps, CI changes | None |
 
@@ -71,10 +71,10 @@ Follow **Conventional Commits** (https://conventionalcommits.org):
 
 **Examples:**
 ```
-feat(hud-core): add procedural focal prop
+feat(world): add the campfire chapter
 fix(drone): prevent flicker on section change
-perf(scene): lazy-load Three.js chunk on first user interaction
-chore(deps): upgrade angular-three to v4.1.0
+perf(world): skip offscreen scenery when the camera has not moved
+chore(deps): upgrade @angular/core to v21.2.15
 docs(vision): update section mapping table
 ```
 
@@ -391,7 +391,7 @@ git tag -a v1.0.0 -m "Initial launch — 3D scene complete"
 git push origin v1.0.0
 ```
 
-Then use the GitHub Releases page to attach any optimised `.glb` as a release asset (keeps large binaries out of the main git history). Note: the live scene is currently fully procedural and ships no GLBs.
+The site ships no binary assets, so releases carry source only — there is nothing to attach.
 
 ---
 

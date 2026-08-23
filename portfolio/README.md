@@ -1,59 +1,109 @@
-# Portfolio
+# Pixel World — Developer Portfolio
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+A side-scrolling pixel-art portfolio built with Angular 21. You walk an avatar east across a
+3260-pixel world; the walk position drives everything — which content panel opens, the time of day,
+the progress bar, the HUD. Dawn on the hill, nightfall at the campfire.
 
-## Development server
+Live at **<https://nk-0-0.github.io/portfolio/>**
 
-To start a local development server, run:
+| Dawn on the hill | Nightfall at the campfire |
+|---|---|
+| ![The opening hill at morning](docs/media/preview-morning.png) | ![The campfire at nightfall](docs/media/preview-nightfall.png) |
 
-```bash
-ng serve
+---
+
+## How it works
+
+A single `<canvas>` renders the world. A DOM overlay renders the content on top of it. The two talk
+through exactly one place — a service full of signals.
+
+| Layer | File | Responsibility |
+|---|---|---|
+| Engine | `src/app/world/world-renderer.ts` | Simulation and painting. Plain TypeScript, no Angular. |
+| Bridge | `src/app/world/world-state.service.ts` | Signals out (state), commands in. |
+| Overlay | `src/app/ui/**` | Panels, HUD, project overlay. Read signals only. |
+| Content | `src/app/content/portfolio.content.ts` | Every word and link on the site. |
+
+The art is not image files. Sprites are arrays of equal-length strings in
+`src/app/world/sprites.ts`, where each character indexes a colour palette and `.` is transparent:
+
+```ts
+walkA: [
+  '................','.....kkkkk......','....knnhhhhk....',
+  '...khnnhhhhk....','...khfssssk.....', /* ... */
+],
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Change a character, change the world. Everything draws 1:1 into a small offscreen buffer that is
+blitted up with smoothing off, so the pixels stay crisp and a 4K display costs no more to render
+than a 1080p one.
 
-## Code scaffolding
+## Controls
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+| Input | Action |
+|---|---|
+| `←` `→` or `A` `D` | Walk |
+| `Shift` | Run |
+| `E` | Interact at the current stop |
+| Click the ground | Walk there |
+| Click the avatar / the dog | They react |
+| Wheel / trackpad | Scrub along the world |
+| `Esc` | Close a case study |
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Getting started
 
 ```bash
-ng build
+npm install
+npm start          # http://localhost:4200
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Making it yours
 
-## Running unit tests
+Almost everything you'll want to change lives in **`src/app/content/portfolio.content.ts`** — your
+name, the panel copy, the skill tiles, the timeline, the projects and their case studies, the
+contact links. Nothing under `ui/` hardcodes copy.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Values currently marked `TODO` in that file are placeholders inherited from the design prototype
+(`YOUR NAME`, `Company Name`, `you@example.com`) and still need real details.
+
+Project screenshots go in `public/projects/` and are referenced by `detail.image`; a project with
+`image: null` renders an empty frame with a prompt instead.
+
+Colour and typography tokens are CSS custom properties at the top of `src/styles.scss`. The world's
+own palettes (day, dusk, night) are in `src/app/world/palette.ts`.
+
+## Scripts
 
 ```bash
-ng test
+npm start                # dev server
+npm run build            # production build
+npm run typecheck        # tsc --noEmit
+npm run lint             # angular-eslint
+npx ng test --no-watch   # Vitest unit tests
+npm run e2e:local        # Playwright against a locally built production bundle
+npm run perf:fps         # frame-timing regression gate (p95, 15% tolerance)
 ```
 
-## Running end-to-end tests
+## Quality gates
 
-For end-to-end (e2e) testing, run:
+CI runs lint, typecheck, unit tests and a production build on every PR. Playwright runs the smoke
+suite across Chromium, Firefox and WebKit. Lighthouse CI asserts accessibility ≥ 0.95 and
+best-practices ≥ 0.95 as hard errors.
 
-```bash
-ng e2e
-```
+Current production bundle: **190 kB raw / 55 kB transferred**. Lighthouse scores 100 across
+performance, accessibility, best practices and SEO.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Origin
 
-## Additional Resources
+Ported from a Claude design-canvas prototype, preserved unbuilt at `claude design/` in the repo
+root. The prototype's renderer was framework-agnostic canvas code and was lifted nearly verbatim;
+its presentation layer — inline styles on every element, a bespoke `style-hover` attribute, and a
+render loop that mutated panels through `document.querySelectorAll` sixty times a second — was
+rewritten as Angular components. See [`CLAUDE.md`](CLAUDE.md) for the architecture rules that came
+out of that.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Attribution
+
+The pixel art is original. Fonts are SIL OFL (Silkscreen, Newsreader, Familjen Grotesk); technology
+icons are MIT-licensed Devicon, hot-linked from jsDelivr with text fallbacks. Full ledger in
+[`docs/ASSET_CREDITS.md`](docs/ASSET_CREDITS.md).

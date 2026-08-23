@@ -1,103 +1,251 @@
-/* ============================================================
-   Global design tokens and resets — Signal Ghost sci-fi identity
-   Palette source of truth: docs/vision/VISION.md palette table.
-   ============================================================ */
+/**
+ * Global tokens and the shared surface language for the pixel world overlay.
+ *
+ * The original design carried every value as an inline style attribute. Those
+ * are consolidated here: colours, type ramps and the frosted-panel treatment
+ * live as custom properties and a handful of classes, so a palette change is
+ * one edit rather than a find-and-replace across the markup.
+ */
 
 :root {
-  --bg-hue:           240;      /* tweened by GSAP per section */
-  --color-bg:         #05060a;  /* background / void   */
-  --color-bg-panel:   #0b0f1a;  /* surface panel       */
-  --color-bg-overlay: rgba(0, 0, 0, 0.72);
-  --color-accent:     #00e5ff;  /* Signal Cyan — identity axis primary   */
-  --color-accent-dim: #008a99;  /* derived dim cyan (no VISION value; same hue, lower value) */
-  --color-magenta:    #b464ff;  /* Signal Magenta — identity axis secondary */
-  --color-green:      #39ff9d;  /* terminal green — functional/element-level only */
-  --color-text:       #e6ecf5;  /* text primary        */
-  --color-muted:      #848da4;  /* text muted — 6.10:1 on --color-bg (WCAG AA body) */
-  --color-amber:      #ffcc00;  /* live-status amber — functional/element-level only */
-  --color-danger:     #ff3b3b;  /* danger — UI form-validation only */
-  --color-tag-bg:     rgba(0, 229, 255, 0.07);
-  --color-tag-border: rgba(0, 229, 255, 0.22);
+  // Ink and accents
+  --ink: #fffaf0;
+  --ink-soft: rgb(255 250 240 / 0.85);
+  --ink-mute: rgb(255 250 240 / 0.6);
+  --ink-faint: rgb(255 250 240 / 0.45);
+  --accent: #ffd98a;
+  --accent-warm: #ffe6ac;
+  --accent-cool: #8fc7ff;
 
-  /* ── Typography ─────────────────────────────────────── */
-  --font-display: 'Chakra Petch', sans-serif;             /* hero name / display */
-  --font-heading: 'Rajdhani', sans-serif;                 /* section headings    */
-  --font-ui:      'Inter', -apple-system, sans-serif;     /* body / UI copy      */
-  --font-mono:    'JetBrains Mono', 'Courier New', monospace;
+  // Surfaces
+  --surface-top: rgb(10 22 24 / 0.72);
+  --surface-bot: rgb(8 18 22 / 0.66);
+  --surface-solid-top: rgb(12 24 26 / 0.96);
+  --surface-solid-bot: rgb(8 18 22 / 0.96);
+  --chip-bg: rgb(10 22 24 / 0.55);
+  --hairline: rgb(255 250 240 / 0.16);
+  --hairline-strong: rgb(255 250 240 / 0.28);
+  --accent-line: rgb(255 217 138 / 0.5);
 
-  --transition-panel: 400ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-hover: 200ms ease;
-  --transition-fade:  300ms ease;
+  // Type
+  --font-pixel: 'Silkscreen', monospace;
+  --font-serif: 'Newsreader', serif;
+  --font-sans: 'Familjen Grotesk', system-ui, sans-serif;
+
+  // Shape
+  --radius: 3px;
+  --radius-sm: 2px;
+  --blur: blur(12px);
+  --lift: 0 20px 50px rgb(4 12 18 / 0.42);
+  --lift-sm: 0 18px 44px rgb(4 12 18 / 0.4);
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
+html,
+body {
   margin: 0;
   padding: 0;
-}
-
-/* FR-9: keyboard focus indicator on every focusable element (skip-nav,
-   in-content links, form fields). Signal Cyan clears WCAG 2.4.11 non-text
-   contrast (≥12.4:1 on every dark surface here). */
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-html, body {
-  width: 100%;
-  overflow-x: hidden;
-  /* GSAP tweens --bg-hue (0-360) for per-section colour shifts.
-     The gradient is transparent at the edges so Three.js particles
-     and fog show through the canvas above it.                       */
-  background: radial-gradient(
-    ellipse at 65% 45%,
-    hsl(var(--bg-hue), 45%, 6%) 0%,
-    hsl(var(--bg-hue), 25%, 3%) 60%,
-    #020204 100%
-  );
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.scrollable {
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-muted) transparent;
-
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: var(--color-muted); border-radius: 2px; }
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+  background: #0a1230;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+
+  &:hover {
+    color: #fff3d4;
+  }
+}
+
+::selection {
+  background: var(--accent);
+  color: #16241f;
+}
+
+/** Small caps pixel label — section numbers, HUD entries, button text. */
+.pixel {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+.eyebrow {
+  @extend .pixel;
+  letter-spacing: 0.24em;
+  color: var(--accent);
+}
+
+.meta {
+  @extend .pixel;
+  color: var(--ink-faint);
+}
+
+/** The frosted glass surface shared by panels, chips and the HUD. */
+%surface {
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--surface-top), var(--surface-bot));
+  backdrop-filter: var(--blur);
+}
+
+.surface {
+  @extend %surface;
+}
+
+.chip {
+  @extend %surface;
+  padding: 8px 12px;
+  background: var(--chip-bg);
+  backdrop-filter: blur(10px);
   white-space: nowrap;
 }
 
-.section-heading {
-  font-family: var(--font-heading);
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--color-accent);
-  margin-bottom: 24px;
-  letter-spacing: 0.04em;
+/**
+ * A chapter panel. Visibility is driven by an `.is-open` class rather than a
+ * per-frame opacity lerp — the original animated this in JavaScript at 60fps;
+ * a CSS transition gets the same fade off the main thread.
+ */
+.panel {
+  @extend %surface;
+  position: absolute;
+  z-index: 5;
+  padding: 26px 28px 28px;
+  box-shadow: var(--lift);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease,
+    visibility 0.28s;
+
+  &.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  h1,
+  h2 {
+    margin: 12px 0;
+    font-family: var(--font-serif);
+    font-weight: 300;
+    line-height: 1.08;
+    color: var(--ink);
+  }
+
+  p {
+    margin: 0 0 16px;
+    font-size: 15px;
+    line-height: 1.62;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
 }
 
-.tag {
+/** Panels that sit beside the avatar, vertically centred on the left. */
+.panel--side {
+  left: 5vw;
+  top: 47%;
+  width: min(410px, 38vw);
+  transform: translateY(calc(-50% + 14px));
+
+  &.is-open {
+    transform: translateY(-50%);
+  }
+}
+
+/**
+ * The stage panel spans the top of the viewport and carries no surface of its
+ * own — its chip and project tiles are the visible surfaces.
+ */
+.panel--rail {
+  left: 0;
+  right: 0;
+  top: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  transform: translateY(-12px);
+
+  &.is-open {
+    transform: translateY(0);
+  }
+}
+
+.btn {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--color-accent);
-  background: var(--color-tag-bg);
-  border: 1px solid var(--color-tag-border);
-  white-space: nowrap;
+  gap: 10px;
+  padding: 12px 18px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgb(255 250 240 / 0.9);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+
+  &:hover {
+    border-color: rgb(255 250 240 / 0.6);
+  }
+
+  &--primary {
+    border-color: var(--accent-line);
+    background: rgb(255 217 138 / 0.12);
+    color: var(--accent-warm);
+
+    &:hover {
+      background: rgb(255 217 138 / 0.24);
+      color: var(--ink);
+    }
+  }
+}
+
+/**
+ * Keyboard focus ring. Uses `:focus-visible` so pointer users never see it,
+ * and sits on an outline so it never shifts layout.
+ */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes hintBob {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(5px);
+    opacity: 1;
+  }
+}
+
+/** Honour a reduced-motion preference for every decorative transition. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

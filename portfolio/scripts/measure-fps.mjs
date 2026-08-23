@@ -1,18 +1,22 @@
 #!/usr/bin/env node
 // Frame-timing regression gate (ROADMAP Milestone 4, issue 4.7 / REQUIREMENTS NFR-9).
 //
-// Drives a scripted scroll-through of all six sections of a local production
+// Walks the avatar the full width of the pixel world in a local production
 // build, samples requestAnimationFrame deltas, and gates the p95 frame time
 // against a committed baseline (e2e/perf/baseline.json) with a 15% tolerance.
+//
+// A continuous walk is the worst case for this renderer: every frame repaints
+// the whole offscreen buffer (sky gradient, sea, per-column terrain, scenery,
+// sprites) and the camera never stops moving, so nothing can be skipped.
 //
 // First run (no baseline): writes the baseline and passes — establishing "the
 // script runs and produces a number," per the owner's decision. Every later run
 // compares against that committed baseline and fails if p95 regresses > 15%.
 //
 // Metric choice — p95 frame time (ms), lower is better:
-//   Mean hides jank. A scene that holds 60fps but hitches on each scroll
-//   transition has a fine mean but a bad p95, and it's the hitch a recruiter
-//   feels — not the average. p95 is the standard "worst-frame-that-matters"
+//   Mean hides jank. A world that holds 60fps but hitches each time a new
+//   landmark scrolls into view has a fine mean but a bad p95, and it's the
+//   hitch a visitor feels — not the average. p95 is the standard "worst-frame-that-matters"
 //   percentile (it discards the top ~5% one-off GC/layout spikes that would
 //   make a max-based gate flaky). Mean is recorded too, for context, but the
 //   gate is p95 only.
@@ -37,9 +41,8 @@ const BASELINE = join(ROOT, 'e2e', 'perf', 'baseline.json');
 
 const TOLERANCE = 0.15; // 15% p95 regression budget (owner decision)
 const PORT = 4174; // distinct from the smoke suite's 4173 so both can coexist
-const SECTIONS = ['about', 'experience', 'skills', 'projects', 'contact'];
-const DWELL_MS = 1200; // per-section: covers the Lenis scroll + GSAP reveal
-const SETTLE_MS = 800; // let the scene finish its load-time work before sampling
+const WALK_MS = 22_000; // hill -> campfire at the game's own walk speed
+const SETTLE_MS = 800; // let the first frames and font swap land before sampling
 
 const p95 = (xs) => [...xs].sort((a, b) => a - b)[Math.ceil(0.95 * xs.length) - 1];
 const mean = (xs) => xs.reduce((s, x) => s + x, 0) / xs.length;
@@ -76,18 +79,20 @@ async function measure(baseUrl) {
     });
 
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
-    await page.locator('ngt-canvas canvas').first().waitFor({ state: 'visible', timeout: 20_000 });
+    await page
+      .locator('app-pixel-world canvas')
+      .first()
+      .waitFor({ state: 'visible', timeout: 20_000 });
     await page.waitForTimeout(SETTLE_MS);
 
-    // Discard load-time frames — measure only the scroll-through motion.
+    // Discard load-time frames — measure only the walk.
     await page.evaluate(() => {
       window.__frameTimes.length = 0;
     });
 
-    for (const id of SECTIONS) {
-      await page.locator(`button[data-section="${id}"]`).evaluate((el) => el.click());
-      await page.waitForTimeout(DWELL_MS);
-    }
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(WALK_MS);
+    await page.keyboard.up('ArrowRight');
 
     const frames = await page.evaluate(() => window.__frameTimes);
     if (!Array.isArray(frames) || frames.length < 30) {
@@ -145,7 +150,7 @@ async function main() {
     mean: r2(mean(frames)),
   };
 
-  console.log('\nFrame-timing measurement (Chromium, scripted 6-section scroll-through)');
+  console.log('\nFrame-timing measurement (Chromium, full-world walk)');
   console.log(`  samples : ${result.samples}`);
   console.log(`  mean    : ${result.mean} ms  (~${r2(1000 / result.mean)} fps)`);
   console.log(`  p95     : ${result.p95} ms  (~${r2(1000 / result.p95)} fps)`);

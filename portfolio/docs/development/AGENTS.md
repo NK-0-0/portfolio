@@ -1,110 +1,83 @@
 # AGENTS.md — Cross-Tool AI Assistant Instructions
 
-> **Corrected 2026-07-05.** This file previously described the archived hover/hotspot/click-panel design (`docs/archive/LEGACY_VISION.md` / `LEGACY_ARCHITECTURE.md`) as if it were the live app — it never was updated after the scroll-pivot. That was a real gap: this file is the one non-Claude AI tools (Cursor, Copilot, etc.) actually read, so it was actively misleading anyone using a different assistant. Content below now matches `CLAUDE.md` / `docs/architecture/ARCHITECTURE.md`. If the two ever drift again, `CLAUDE.md` wins.
+> **Rewritten 2026-08-23.** The previous version described the Three.js scroll-driven portfolio,
+> which was deleted in the pixel-world port. Nothing from that architecture survives in `src/`.
 
 ## What this file is
 
-**AGENTS.md** is an open standard (Linux Foundation, 2025) for giving AI coding assistants project-specific instructions. It is tool-agnostic — Cursor, Copilot, Sourcegraph Cody, Factory, and others all read this file.
+**AGENTS.md** is an open standard (Linux Foundation, 2025) for giving AI coding assistants
+project-specific instructions. It is tool-agnostic — Cursor, Copilot, Cody, Factory and others read
+it.
 
-**Claude Code** reads `CLAUDE.md` (at the project root) rather than this file. The canonical instructions for this project live there:
+**Claude Code** reads [`CLAUDE.md`](../../CLAUDE.md) at the project root instead. That file is
+canonical; this one is the cross-tool mirror. **If the two ever drift, `CLAUDE.md` wins.**
+
+---
+
+## The one-line summary
+
+Angular 21 static SPA, deployed to GitHub Pages, presented as a side-scrolling pixel-art world. A
+single `<canvas>` renders the world; the visitor walks an avatar east across 3260 world-pixels, and
+that position drives which content panel is open, the time of day, and the HUD. No scrolling page,
+no 3D, no WebGL — it is a 2D canvas.
+
+## Architecture in three lines
 
 ```
-portfolio/CLAUDE.md                  ← Claude Code reads this automatically
-portfolio/docs/development/AGENTS.md ← this file (cross-tool reference + rationale)
+WorldRenderer (world/world-renderer.ts)        simulation + painting. Plain TS, zero Angular.
+WorldStateService (world/world-state.service.ts)  signals. The only channel between the two.
+ui/** components                                read signals. Never touch the renderer.
 ```
 
-If you are using a tool that reads `AGENTS.md` from the project root, symlink or copy `CLAUDE.md` → `AGENTS.md`.
+## Non-obvious constraints — read before writing code
 
----
+1. **The renderer must never touch the overlay.** The design prototype this was ported from had a
+   render loop that called `document.querySelectorAll('[data-panel]')` and set `.style.opacity`
+   sixty times a second. Untangling that was the point of the port. To make the world affect the
+   DOM, add a field to `WorldSnapshot` and bind a component to the resulting signal.
 
-## What an AI assistant should know before touching this project
+2. **No SSR, but there *is* a prerender.** `angular.json` sets `outputMode: "static"`, which still
+   executes the app in Node at build time. Anything touching `window`, `document` or a canvas must
+   be inside `afterNextRender`. Forgetting this breaks the build, not just the runtime.
 
-### The one-line summary
-Angular 21 static SPA. Lenis + GSAP ScrollTrigger drive one continuous scrollable page through six sections; a fixed WebGL canvas behind it lerps a 3D focal prop, two floating props, lighting/fog, and camera position to per-section target values as `ScrollStateService.activeSection` changes. There is no click-to-open-panel navigation and no hover/raycast interaction — scroll position is the only input the 3D scene responds to. Deploys to GitHub Pages. Mid-rebrand to an original "Signal Ghost" sci-fi identity (the earlier third-party fan-art assets were removed in `docs/ROADMAP.md` Milestone 1) — see `docs/vision/VISION.md` and `docs/vision/REQUIREMENTS.md`.
+3. **Zoneless change detection.** `provideZonelessChangeDetection()`. Signals only — no
+   `NgZone`, no `fakeAsync`/`flush` in tests, no RxJS for UI state.
 
-### Non-obvious constraints (read these before writing any code)
+4. **Panel fades are CSS, not JavaScript.** Visibility is an `.is-open` class with a transition.
+   Do not animate opacity from the render loop.
 
-1. **No SSR — static prerender only.** `angular.json` has `outputMode: "static"`. GitHub Pages cannot run a Node server. Never re-introduce `server.ts` or the SSR build chain.
+5. **All copy lives in `src/app/content/portfolio.content.ts`.** If you are editing a user-visible
+   string inside a template, you are in the wrong file.
 
-2. **WebGL guard is mandatory.** Angular's build runs in Node for prerendering even on static output. Any Three.js / DOM code must be wrapped in `isPlatformBrowser(inject(PLATFORM_ID))` or placed inside lifecycle hooks that only fire in a browser (`afterNextRender`, `effect()` with browser check).
+6. **Sprites are the art files.** `src/app/world/sprites.ts` holds arrays of equal-length strings;
+   each character indexes the `PAL` colour map and `.` is transparent. Rows must stay rectangular —
+   a spec enforces it.
 
-3. **Correct NGT package name.** The package is `angular-three` (currently v4.2.2 in this repo), not `@angular-three/core` (deprecated/wrong package). Install via `npm install angular-three angular-three-plugin`. Note: this codebase's `injectLoader`/`injectBeforeRender` calls are themselves deprecated as of v4.2.2 (superseded by `loaderResource`/`beforeRender`, removed in v5) — they still work today but see `docs/vision/REQUIREMENTS.md` NFR-8 before adding new code against them.
+7. **Chapter order is load-bearing in three places** and must stay in sync: `CH` in
+   `world/world.model.ts`, the panel components selected by index in `app.ts`, and the landmark
+   drawn at that X in `world-renderer.ts`.
 
-4. **Signals, not RxJS, for UI state.** `ScrollStateService` (`src/app/core/services/scroll-state.service.ts`) is the single source of truth for scroll position (`activeSection`, `scrollProgress`). Do not create parallel reactive state. `SectionStore` (`section-store.ts`) was **deleted** in Milestone 0.2 (part of the archived panel design) — gone, not merely orphaned; do not re-create it, see `docs/ROADMAP.md` Milestone 0.
+8. **Do not reintroduce** `three`, `angular-three`, `gsap`, `lenis`, or `ngxtension`. They were
+   removed with the old app.
 
-5. **Large assets go in `public/`**, not `src/assets/`. Files in `public/` are copied as-is to the build output without Angular processing them.
+## Conventions
 
-6. **Bundle budget is raised.** `angular.json` allows up to 4MB (Three.js + models). Still lazy-load the Three.js chunk via `@defer` in `app.ts`.
+- Standalone components only; no NgModules
+- `inject()` for DI, not constructor injection
+- `@if` / `@for`, never `*ngIf` / `*ngFor`
+- SCSS files, no inline styles in templates; shared tokens in `src/styles.scss`
+- No `any` — `unknown` plus type guards at boundaries
+- Comments explain *why*, not *what*
 
-7. **Mobile gets a 2D fallback.** `DeviceCapabilityService` detects mobile/no-WebGL and switches to `<app-fallback>`. Do not attempt 3D on mobile.
+## Commands
 
-8. **No post-processing/bloom.** `VISION.md`'s "What NOT To Do" explicitly forbids resurrecting bloom/hover-raycast — a prior build tried both and they were among the reasons it stalled. The `postprocessing` npm package and `three/post-processing/effects.component.ts` were both deleted in Milestone 0.2 — gone, not merely orphaned; do not wire them back in.
+```bash
+npm start                # dev server
+npm run build            # production build
+npm run typecheck        # tsc --noEmit
+npm run lint
+npx ng test --no-watch   # Vitest
+npm run e2e:local        # Playwright vs a local production build
+```
 
----
-
-## Stack at a Glance
-
-| Concern | Package | Version |
-|---------|---------|---------|
-| Framework | `@angular/core` | 21.2 |
-| 3D renderer | `angular-three` | 4.2.2 (see constraint 3 above — some APIs used in this codebase are deprecated) |
-| Three.js peer | `three` | 0.182.x |
-| Scroll physics | `lenis` | 1.3.x |
-| Scroll-linked tweening | `gsap` (ScrollTrigger) | 3.15.x |
-| State | Native Angular signals | built-in |
-| Testing | Vitest | 4.x (Angular default) |
-| Build | `@angular/build` | 21.2 |
-| Deploy | GitHub Actions (`.github/workflows/deploy.yml`) | — |
-
-Full stack reference with code snippets: `docs/architecture/SKILLS_REFERENCE.md`. **Note:** `postprocessing` is listed there for historical/reference purposes only — it is not part of the live build (constraint 8 above).
-
----
-
-## File Map for Common Tasks
-
-| Task | Where to look |
-|------|---------------|
-| Change per-section camera/fog/light targets | `src/app/three/scene/scene-controller.component.ts`, `src/app/three/environment/lighting.component.ts` |
-| Edit a portfolio section's content | `src/app/ui/sections/<section>/` |
-| Adjust the focal 3D prop | `src/app/three/mask/mask.component.ts` (rebrand target: HUD-core, see `docs/vision/VISION.md`) |
-| Adjust the two floating props | `src/app/three/floating-models/floating-models.component.ts` |
-| Change scroll behavior / Lenis / ScrollTrigger | `src/app/ui/scroll-layout/scroll-layout.component.ts` |
-| Modify the mobile 2D fallback | `src/app/ui/fallback/fallback.component.ts` |
-| Swap a 3D model | `public/models/<name>/` + update `ModelLoadingService.TOTAL_ASSETS` if the loaded-asset count changes |
-| Deploy | Push to `main` → GitHub Actions runs automatically |
-
----
-
-## Coding Style Rules
-
-- Standalone Angular components only — no NgModules
-- `inject()` for DI — no constructor injection
-- `@if` / `@for` control flow — no structural directive syntax
-- SCSS for styles — no inline styles
-- No `any` — use `unknown` + type guards
-- No comments unless the *why* is non-obvious
-- No Leva / debug helpers in production code
-
----
-
-## Testing Rules
-
-- Vitest only — no Jasmine, no Karma
-- `vitest-canvas-mock` for WebGL surface mocking (imported once in `src/test-setup.ts`) — **not** `jest-webgl-canvas-mock`, this project doesn't use Jest anywhere
-- No `fakeAsync` / `flush` — project is zoneless
-- Test *behaviour* (signal state changes) not Three.js/NGT render output
-- `ng test --run` for CI; `npm test` for dev watch mode
-
----
-
-## Links
-
-- Vision + section mapping: `docs/vision/VISION.md`
-- Functional/non-functional requirements: `docs/vision/REQUIREMENTS.md`
-- Architecture decisions: `docs/architecture/ARCHITECTURE.md`
-- Tech stack reference: `docs/architecture/SKILLS_REFERENCE.md`
-- Stall diagnosis + milestone plan: `docs/ROADMAP.md`
-- 3D model sourcing + optimisation: `docs/development/ASSET_PIPELINE.md` (superseded for v1 — see banner at top of that file)
-- Local dev setup: `docs/development/DEVELOPMENT.md`
-- GitHub Pages deployment: `docs/deployment/GITHUB_DEPLOYMENT.md`
-- GitHub workflow + CI: `docs/deployment/GITHUB_INSTRUCTIONS.md`
+CI runs lint, typecheck, unit tests and a production build on every PR.

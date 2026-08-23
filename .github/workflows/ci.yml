@@ -26,6 +26,10 @@ jobs:
         working-directory: portfolio
         run: npm run lint
 
+      - name: Typecheck
+        working-directory: portfolio
+        run: npm run typecheck
+
       - name: Unit tests
         working-directory: portfolio
         run: npx ng test --no-watch
@@ -33,7 +37,3 @@ jobs:
       - name: Production build
         working-directory: portfolio
         run: npx ng build --configuration production
-
-      - name: GLB size-budget check
-        working-directory: portfolio
-        run: npm run check:glb-budget

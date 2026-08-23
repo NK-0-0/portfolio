@@ -1,10 +1,9 @@
 :host {
-  display: block;
-  width: 100%;
-}
-
-.bootstrap-loading {
   position: fixed;
   inset: 0;
-  background: var(--color-bg);
+  display: block;
+  overflow: hidden;
+  background: #0a1230;
+  font-family: var(--font-sans);
+  user-select: none;
 }

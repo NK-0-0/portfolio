@@ -10,8 +10,7 @@
     "e2e:local": "playwright test --config=playwright.config.local.ts",
     "perf:fps": "ng build --configuration production && node scripts/measure-fps.mjs",
     "lint": "ng lint",
-    "optimize:models": "gltf-transform optimize --compress draco --texture-compress ktx2 --texture-size 1024",
-    "check:glb-budget": "node scripts/check-glb-budget.mjs"
+    "typecheck": "tsc -p tsconfig.app.json --noEmit"
   },
   "private": true,
   "packageManager": "npm@11.9.0",
@@ -23,12 +22,7 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
-    "angular-three": "^4.2.2",
-    "gsap": "^3.15.0",
-    "lenis": "^1.3.23",
-    "ngxtension": "^7.2.0",
     "rxjs": "~7.8.0",
-    "three": "^0.182.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -36,12 +30,9 @@
     "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.0",
     "@eslint/js": "^10.0.1",
-    "@gltf-transform/cli": "^4.4.1",
     "@playwright/test": "^1.60.0",
     "@types/node": "^20.17.19",
-    "@types/three": "^0.182.0",
     "angular-eslint": "21.4.0",
-    "angular-three-plugin": "^4.2.2",
     "eslint": "^10.3.0",
     "http-server": "^14.1.1",
     "jsdom": "^28.0.0",
