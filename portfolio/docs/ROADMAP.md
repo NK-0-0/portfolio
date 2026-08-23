@@ -47,12 +47,17 @@ None of this is a code change; it is all `src/app/content/portfolio.content.ts`.
 
 - [x] **Link-unfurl metadata** — done 2026-08-23. Open Graph + Twitter card tags with absolute URLs
       and `public/preview.png`, since the client-only build gives unfurlers nothing else to read.
-- [ ] **No crawlable content without JS.** The build emits an empty `<app-root>`. Options: enable
-      real prerendering (`@angular/ssr` + server entry — but that re-adds a dependency the project
-      dropped on purpose), or add a plain document view of the same content.
-- [ ] **No skim path.** Content is revealed by walking, which is the point, but a recruiter who
-      wants the facts in ten seconds has no route to them. A `/read` view generated from
-      `portfolio.content.ts` would also serve as the no-JS and print/PDF surface. Decision pending.
+- [ ] **Still no crawlable content without JS.** `/read` fixes skimmability but not crawlability —
+      it is a client-side route, so the served HTML is still an empty `<app-root>`. Enabling
+      build-time prerendering would emit both routes as real HTML. Worth noting this is *not* the
+      same as re-enabling SSR: prerendering runs at build time and the output stays static files,
+      compatible with GitHub Pages. Decision pending.
+- [x] **Skim path** — done 2026-08-23. `/#/read` renders the whole portfolio as one plain document
+      from the same `portfolio.content.ts`, with print styles for PDF export. Linked prominently
+      from the world's header.
+- [x] **Positioning rebalance** — done 2026-08-23. The accent now falls on the engineering project
+      and TypeScript rather than the game and Unreal, so a skimmer reads "engineer who does game
+      dev" rather than the reverse. Guarded by tests in `portfolio.content.spec.ts`.
 
 ## Open — infrastructure
 

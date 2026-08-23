@@ -34,7 +34,12 @@ const RAIL_STEP = 258;
       <ul #rail class="rail" data-rail>
         @for (project of projects; track project.title; let i = $index) {
           <li>
-            <button type="button" class="card" (click)="state.openDetail(i)">
+            <button
+              type="button"
+              class="card"
+              [class.card--featured]="project.featured"
+              (click)="state.openDetail(i)"
+            >
               <span class="card__head">
                 <span class="card__kind" [class.card__kind--web]="project.tone === 'web'">{{
                   project.kind

@@ -63,6 +63,19 @@ automatically and landscape output stays bit-identical. If you add scenery with 
 Below 720px CSS width, panels dock as bottom sheets (`--sheet-max`). The ground line is deliberately
 placed to clear them — if you change one, check the other.
 
+### Routing
+
+Two routes, **hash-located** (`withHashLocation()`). The build is client-side only, so GitHub Pages
+has no `read/index.html` to serve — a path-based deep link would 404 and depend on a redirect shim
+whose correct base path differs between local (`/`) and Pages (`/portfolio/`). A hash URL resolves
+identically in both. Revisit only if build-time prerendering is added.
+
+The world route is **eager** and `/read` is **lazy**. Do not flip this: lazy-loading the primary
+experience puts a second network round trip in front of first paint.
+
+`/read` is the skim path, the print/PDF surface, and the answer for anyone who will not walk a world
+to find out where you worked. Keep it austere — it is a reference document, not a second showpiece.
+
 ### Fast travel
 
 `travelTo()` picks a speed to land the trip in `TRAVEL_FRAMES`, floored at run speed. `zoomTick()`
@@ -105,6 +118,8 @@ with no system Chrome also needs `CHROME_PATH` (see `docs/agent-notes/angular-de
 
 ```
 src/app/
+  app.ts                   root: <router-outlet /> only
+  app.routes.ts            '' -> world (eager), 'read' -> document view (lazy)
   world/
     sprites.ts             pixel art as character maps + PAL colour keys. THE art files.
     palette.ts             day/dusk/night grading; mix, hash, clamp helpers
@@ -115,11 +130,12 @@ src/app/
   content/
     portfolio.content.ts   EVERY word and link on the site
   ui/
+    world-shell/           the '' route: canvas underneath, overlay on top
+    read/                  the '/read' route: the same content as a plain document
     hud/                   identity chip, clock, chapter nav, legend, prompt, progress
     panels/                one component per chapter (hill, works, toolbelt, trail,
                            jetty, campfire)
     project-detail/        the case-study overlay
-  app.ts                   root layout: canvas underneath, overlay on top
 
 claude design/             the original prototype, kept as reference. NOT built or shipped.
 ```
@@ -140,7 +156,19 @@ claude design/             the original prototype, kept as reference. NOT built 
 ### Content changes go in `content/portfolio.content.ts`
 
 Nothing under `ui/` hardcodes copy. If you are editing a string inside a template, you are almost
-certainly in the wrong file.
+certainly in the wrong file. Both the world panels and `/read` render from this one file, so they
+cannot disagree.
+
+`COLOPHON` states the bundle size, Lighthouse scores and test counts. Those are claims about the
+build — re-measure before editing them, don't estimate.
+
+### Positioning is asserted, not assumed
+
+This is the portfolio of a software engineer who does game dev on the side, not the reverse. The two
+elements carrying an accent — `PROJECTS[].featured` and `SKILLS[].featured` — are the loudest signal
+a skimmer receives, so `portfolio.content.spec.ts` asserts that exactly one of each is set and that
+neither is the game engine. If you deliberately change the positioning, change those tests too; do
+not delete them.
 
 ### Adding or moving a chapter
 
@@ -209,5 +237,8 @@ upload `portfolio/dist/portfolio/browser`.
 
 Live at `https://nk-0-0.github.io/portfolio/`.
 
-Production bundle is ~190 kB raw / ~55 kB transferred. The budget in `angular.json` is 300 kB
-warning / 500 kB error — if you are approaching that, something has gone wrong.
+Production bundle is ~300 kB raw / ~81 kB transferred; the budget in `angular.json` is 400 kB
+warning / 600 kB error. Roughly 100 kB raw of that is `@angular/router`, accepted so `/read` can be
+a shareable URL rather than a toggle. The document view is code-split (`loadComponent`) and the
+world route is deliberately eager — lazy-loading the primary experience would put a second network
+round trip in front of first paint.

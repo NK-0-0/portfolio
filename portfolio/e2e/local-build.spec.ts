@@ -174,3 +174,62 @@ test.describe('narrow viewport', () => {
     expect(after).toBeGreaterThan(before);
   });
 });
+
+
+test.describe('read view', () => {
+  test('is reachable from the world and comes back', async ({ page }) => {
+    await page.goto('/');
+    await ready(page);
+
+    await page.getByRole('link', { name: /READ AS A PAGE/ }).click();
+    await expect(page).toHaveURL(/#\/read$/);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('worlds by night');
+    // The world must not keep running behind the document.
+    await expect(page.locator('app-pixel-world canvas')).toHaveCount(0);
+
+    await page.getByRole('link', { name: /ENTER THE WORLD/ }).first().click();
+    await expect(page.locator('app-pixel-world canvas')).toBeVisible();
+  });
+
+  test('is a shareable deep link', async ({ page }) => {
+    // Hash routing so this resolves identically on GitHub Pages and locally.
+    await page.goto('/#/read');
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page).toHaveTitle(/short version/);
+  });
+
+  test('carries every section of the portfolio', async ({ page }) => {
+    await page.goto('/#/read');
+    for (const heading of [
+      'Selected work',
+      'Tools',
+      'Experience',
+      'Education',
+      'About this site',
+    ]) {
+      await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
+    }
+    // Both projects present, engineering work first.
+    const titles = await page.locator('.project h3').allTextContents();
+    expect(titles).toEqual(['FinFree', 'Cosmic Collector']);
+  });
+
+  test('scrolls, unlike the world route', async ({ page }) => {
+    await page.goto('/#/read');
+    await page.mouse.wheel(0, 1200);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200);
+    await page.screenshot({ path: 'e2e/screenshots/local/read.png', fullPage: false });
+  });
+
+  test('is readable on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/#/read');
+    const box = (await page.locator('.project').first().boundingBox())!;
+    expect(box.width).toBeLessThanOrEqual(390);
+    // No horizontal overflow anywhere on the page.
+    const overflows = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    );
+    expect(overflows).toBe(false);
+  });
+});

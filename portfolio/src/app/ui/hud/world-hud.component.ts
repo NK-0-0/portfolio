@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CONTROLS, IDENTITY } from '../../content/portfolio.content';
 import { CH } from '../../world/world.model';
 import { WorldStateService } from '../../world/world-state.service';
@@ -15,6 +16,7 @@ import { WorldStateService } from '../../world/world-state.service';
 @Component({
   selector: 'app-world-hud',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   template: `
     <header class="header">
       <div class="chip identity">
@@ -22,7 +24,15 @@ import { WorldStateService } from '../../world/world-state.service';
         <span class="name">{{ identity.name }}</span>
         <span class="tagline">· {{ identity.tagline }}</span>
       </div>
-      <span class="chip clock">{{ state.clock() }}</span>
+      <div class="header__end">
+        <!--
+          Deliberately prominent. Plenty of readers will not want to walk a
+          world to find out where someone worked, and burying the way out is
+          how a portfolio loses them.
+        -->
+        <a class="chip chip--link" routerLink="/read">READ AS A PAGE &rarr;</a>
+        <span class="chip clock">{{ state.clock() }}</span>
+      </div>
     </header>
 
     <nav class="rail surface" aria-label="Chapters">

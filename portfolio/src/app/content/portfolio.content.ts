@@ -49,6 +49,12 @@ export interface ProjectDetail {
 }
 
 export interface ProjectCard {
+  /**
+   * Draws the accent border on the rail. Exactly one project should carry it,
+   * and it should be the one that matches the roles being applied for — this
+   * is the first thing a skimmer's eye lands on.
+   */
+  readonly featured?: boolean;
   readonly kind: string;
   /** Accent for the kind label. */
   readonly tone: 'game' | 'web';
@@ -86,31 +92,7 @@ export const WORKS = {
 
 export const PROJECTS: readonly ProjectCard[] = [
   {
-    kind: 'GAME',
-    tone: 'game',
-    year: '2025',
-    title: 'Cosmic Collector',
-    stack: 'UNREAL 5 · C++',
-    blurb: 'Orbital scavenger built around a gravity tether.',
-    summary:
-      'A single-stick orbital scavenger. You tether to debris, swing around a dying satellite, and pull scrap out of the atmosphere before it burns. Built solo in Unreal 5 over four months.',
-    detail: {
-      role: 'Solo — design & code',
-      stack: 'Unreal 5, C++, Blueprints',
-      points: [
-        'Gravity-tether traversal written in C++, exposed to Blueprints so tuning stayed in the editor.',
-        'Procedural debris fields seeded per run, with hand-authored set pieces layered on top.',
-        'Twelve playtests; the grab window moved four times before the pickup felt fair.',
-      ],
-      links: [
-        { label: 'PLAY BUILD', href: 'https://itch.io', primary: true },
-        { label: 'DEVLOG', href: 'https://github.com' },
-      ],
-      image: null,
-      imageAlt: 'Gameplay screenshot — drop one in public/projects/cosmic-collector.png',
-    },
-  },
-  {
+    featured: true,
     kind: 'WEB',
     tone: 'web',
     year: '2026',
@@ -135,17 +117,38 @@ export const PROJECTS: readonly ProjectCard[] = [
       imageAlt: 'Product screenshot — drop one in public/projects/finfree.png',
     },
   },
+  {
+    kind: 'GAME',
+    tone: 'game',
+    year: '2025',
+    title: 'Cosmic Collector',
+    stack: 'UNREAL 5 · C++',
+    blurb: 'Orbital scavenger built around a gravity tether.',
+    summary:
+      'A single-stick orbital scavenger. You tether to debris, swing around a dying satellite, and pull scrap out of the atmosphere before it burns. Built solo in Unreal 5 over four months.',
+    detail: {
+      role: 'Solo — design & code',
+      stack: 'Unreal 5, C++, Blueprints',
+      points: [
+        'Gravity-tether traversal written in C++, exposed to Blueprints so tuning stayed in the editor.',
+        'Procedural debris fields seeded per run, with hand-authored set pieces layered on top.',
+        'Twelve playtests; the grab window moved four times before the pickup felt fair.',
+      ],
+      links: [
+        { label: 'PLAY BUILD', href: 'https://itch.io', primary: true },
+        { label: 'DEVLOG', href: 'https://github.com' },
+      ],
+      image: null,
+      imageAlt: 'Gameplay screenshot — drop one in public/projects/cosmic-collector.png',
+    },
+  },
 ];
 
 /** Filler tiles on the rail. Delete these as real projects land. */
 export const EMPTY_SLOTS: readonly EmptySlot[] = [
   {
-    label: 'SLOT 03 — EMPTY',
-    blurb: "Send me a name, a stack and a screenshot and I'll build the tile.",
-  },
-  {
-    label: 'SLOT 04 — EMPTY',
-    blurb: 'The rail scrolls — eight projects fit here without walking a step further.',
+    label: 'SLOT 03 — OPEN',
+    blurb: 'The rail scrolls, so there is room for what comes next. Got something in mind?',
   },
 ];
 
@@ -159,7 +162,12 @@ export const TOOLBELT = {
 const DEVICON = 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons';
 
 export const SKILLS: readonly SkillTile[] = [
-  { label: 'TYPESCRIPT', fallback: 'TS', icon: `${DEVICON}/typescript/typescript-original.svg` },
+  {
+    label: 'TYPESCRIPT',
+    fallback: 'TS',
+    icon: `${DEVICON}/typescript/typescript-original.svg`,
+    featured: true,
+  },
   { label: 'C#', fallback: 'C#', icon: `${DEVICON}/csharp/csharp-original.svg` },
   { label: '.NET', fallback: '.NET', icon: `${DEVICON}/dotnetcore/dotnetcore-original.svg` },
   { label: 'POSTGRES', fallback: 'PG', icon: `${DEVICON}/postgresql/postgresql-original.svg` },
@@ -168,7 +176,6 @@ export const SKILLS: readonly SkillTile[] = [
     label: 'UNREAL 5',
     fallback: 'UE5',
     icon: `${DEVICON}/unrealengine/unrealengine-original.svg`,
-    featured: true,
     invert: true,
   },
 ];
@@ -231,6 +238,29 @@ export const CONTROLS = {
     '← → WALK · SHIFT RUN · ESC CLOSE',
   ],
   touch: ['TAP THE GROUND TO WALK · DRAG TO SCRUB', 'TAP HIM, THE DOG, OR THE PROMPT'],
+};
+
+/**
+ * What this site is, stated plainly.
+ *
+ * The world reads as a toy until someone knows what it's made of; these are
+ * the numbers that reframe it as an engineering artifact. Keep them honest —
+ * `npm run build` prints the bundle size, `npm run lighthouse` the scores.
+ */
+export const COLOPHON = {
+  heading: 'About this site',
+  body: 'No engine and no images — the world is a 2D canvas, and every sprite is a grid of characters in a TypeScript file. The simulation is a plain class that knows nothing about Angular; it publishes state to signals, and the DOM overlay you are reading renders from those.',
+  facts: [
+    { label: 'BUILT WITH', value: 'Angular 21, zoneless signals, Canvas 2D' },
+    { label: 'BUNDLE', value: '300 kB raw · 81 kB transferred' },
+    {
+      label: 'LIGHTHOUSE',
+      value: '100 accessibility · 100 best practices · 100 SEO · 99 performance',
+    },
+    { label: 'TESTED', value: '23 unit specs · 32 e2e across Chromium, Firefox and WebKit' },
+    { label: 'GATED', value: 'Lint, typecheck, unit, e2e, Lighthouse and a frame-timing budget in CI' },
+  ],
+  source: { label: 'READ THE SOURCE', href: 'https://github.com/NK-0-0/portfolio' },
 };
 
 /** Time-of-day label shown in the header, driven by walk phase. */

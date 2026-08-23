@@ -41,6 +41,28 @@
   color: rgb(253 246 230 / 0.6);
 }
 
+.header__end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.chip--link {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--accent-warm);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    border-color: var(--accent-line);
+    color: var(--ink);
+  }
+}
+
 .clock {
   font-family: var(--font-pixel);
   font-size: 9px;
@@ -220,6 +242,11 @@
   }
 
   .tagline {
+    display: none;
+  }
+
+  /* The clock is flavour; the way out of the world is not. */
+  .clock {
     display: none;
   }
 

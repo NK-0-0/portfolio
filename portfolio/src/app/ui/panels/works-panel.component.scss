@@ -96,8 +96,9 @@
   }
 }
 
-/* The first real project is the featured one. */
-.rail > li:first-child .card {
+/* Emphasis follows `featured` in the content data, not rail position — so the
+   highlighted project can be chosen for the audience without reordering. */
+.card--featured {
   border-color: var(--accent-line);
 }
 

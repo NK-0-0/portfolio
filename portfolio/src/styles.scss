@@ -45,8 +45,13 @@ body {
   margin: 0;
   padding: 0;
   background: #0a1230;
-  overflow: hidden;
 }
+
+/*
+ * The world route locks the viewport by being `position: fixed; inset: 0` —
+ * there is nothing taller than the screen, so nothing scrolls. Overflow is
+ * deliberately NOT hidden globally, because `/read` is a long document.
+ */
 
 * {
   box-sizing: border-box;

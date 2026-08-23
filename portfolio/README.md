@@ -19,6 +19,7 @@ through exactly one place — a service full of signals.
 
 | Layer | File | Responsibility |
 |---|---|---|
+| Routes | `src/app/app.routes.ts` | `/` the world (eager), `/read` the document (lazy). |
 | Engine | `src/app/world/world-renderer.ts` | Simulation and painting. Plain TypeScript, no Angular. |
 | Bridge | `src/app/world/world-state.service.ts` | Signals out (state), commands in. |
 | Overlay | `src/app/ui/**` | Panels, HUD, project overlay. Read signals only. |
@@ -54,6 +55,10 @@ than a 1080p one.
 
 On phones the world re-frames for portrait, panels dock as bottom sheets, and the chapter nav
 becomes a horizontal strip.
+
+**Would rather not walk?** [`/#/read`](https://nk-0-0.github.io/portfolio/#/read) is the whole
+portfolio as one plain document — the same content, rendered from the same source file. It is also
+the print/PDF surface.
 
 ## Getting started
 
@@ -95,8 +100,8 @@ CI runs lint, typecheck, unit tests and a production build on every PR. Playwrig
 suite across Chromium, Firefox and WebKit. Lighthouse CI asserts accessibility ≥ 0.95 and
 best-practices ≥ 0.95 as hard errors.
 
-Current production bundle: **190 kB raw / 55 kB transferred**. Lighthouse scores 100 across
-performance, accessibility, best practices and SEO.
+Current production bundle: **300 kB raw / 81 kB transferred**, with the document view code-split out. Lighthouse: 100 accessibility, 100 best
+practices, 100 SEO, 99 performance.
 
 ## Origin
 
